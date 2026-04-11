@@ -17,7 +17,7 @@ export interface Medication {
   dosage?: string;
 }
 
-/** 到点后出现在待服用列表；超过此时长未勾选则自动清除（毫秒） */
+/** 当前时间 ≥ 预设时间即出现在待服用列表；超过此时长未勾选则自动清除（毫秒） */
 export const PENDING_INTAKE_TTL_MS = 6 * 60 * 60 * 1000;
 
 export interface PendingIntakeItem {
@@ -176,25 +176,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('bedtimeTime', bedtimeTime);
   }, [breakfastTime, lunchTime, dinnerTime, bedtimeTime, mounted]);
 
-  // 请求通知权限
-  useEffect(() => {
-    if (mounted && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  }, [mounted]);
-
-  // 定时检查提醒
+  // 定时检查：当前时间 ≥ 预设时间即写入待服用（不依赖通知）；整点仅在已授权时发系统通知
   useEffect(() => {
     if (!mounted) return;
 
-    // 注册 Service Worker 并在后台运行
     if ('serviceWorker' in navigator) {
       void navigator.serviceWorker.ready;
     }
 
-    const checkNotifications = async () => {
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const parseHHMMToToday = (hhmm: string, ref: Date): Date => {
+      const [h, m] = hhmm.split(':').map(Number);
+      const d = new Date(ref);
+      d.setHours(h, m, 0, 0);
+      return d;
+    };
 
+    const checkScheduled = async () => {
       const now = new Date();
       const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
       const today = now.toDateString();
@@ -206,59 +203,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bedtime: bedtimeTime,
       };
 
-      for (const [key, scheduledTime] of Object.entries(timeConfigs)) {
-        if (currentTime === scheduledTime) {
-          // 确保同一时间点今天只提醒一次
-          if (lastNotifiedRef.current[key] !== today) {
-            const relevantMeds = medications.filter(m => m.times.includes(key as TimeToTake));
-            if (relevantMeds.length > 0) {
-              lastNotifiedRef.current[key] = today;
-              const slot = key as TimeToTake;
-              setPendingIntake((prev) => {
-                const idsToReplace = new Set(
-                  relevantMeds.map((m) => `${m.id}-${slot}-${today}`)
-                );
-                const rest = prev.filter((p) => !idsToReplace.has(p.id));
-                const added: PendingIntakeItem[] = relevantMeds.map((med) => ({
-                  id: `${med.id}-${slot}-${today}`,
-                  medicationId: med.id,
-                  timeSlot: slot,
-                  createdAt: Date.now(),
-                }));
-                return [...rest, ...added];
-              });
+      setPendingIntake((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const toAdd: PendingIntakeItem[] = [];
+        for (const [key, scheduledTime] of Object.entries(timeConfigs)) {
+          const slot = key as TimeToTake;
+          if (now < parseHHMMToToday(scheduledTime, now)) continue;
 
-              const message = await copy(language);
-              const medDetails = relevantMeds.map(m => {
-                const dosageText = m.dosage
-                  ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(m.dosage)}`)})`
-                  : '';
-                return `${m.name}${dosageText}`;
-              }).join(language === 'cn' ? '、' : ', ');
-              
-              const options = {
-                body: `${message}\n${t('Notifications.take')}${medDetails}`,
-                icon: '/icons/icon-192x192.png',
-                badge: '/icons/icon-192x192.png',
-                vibrate: [200, 100, 200],
-                tag: key,
-                renotify: true
-              };
-
-              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                const registration = await navigator.serviceWorker.ready;
-                registration.showNotification(t('Notifications.timeToTake'), options);
-              } else {
-                new Notification(t('Notifications.timeToTake'), options);
-              }
-            }
+          const relevantMeds = medications.filter((m) => m.times.includes(slot));
+          for (const med of relevantMeds) {
+            const id = `${med.id}-${slot}-${today}`;
+            if (existingIds.has(id)) continue;
+            toAdd.push({
+              id,
+              medicationId: med.id,
+              timeSlot: slot,
+              createdAt: Date.now(),
+            });
+            existingIds.add(id);
           }
+        }
+        if (toAdd.length === 0) return prev;
+        return [...prev, ...toAdd];
+      });
+
+      for (const [key, scheduledTime] of Object.entries(timeConfigs)) {
+        if (currentTime !== scheduledTime) continue;
+        if (lastNotifiedRef.current[key] === today) continue;
+
+        const relevantMeds = medications.filter((m) => m.times.includes(key as TimeToTake));
+        if (relevantMeds.length === 0) continue;
+
+        lastNotifiedRef.current[key] = today;
+
+        const canNotify =
+          typeof Notification !== 'undefined' && Notification.permission === 'granted';
+        if (!canNotify) continue;
+
+        const message = await copy(language);
+        const medDetails = relevantMeds.map((m) => {
+          const dosageText = m.dosage
+            ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(m.dosage)}`)})`
+            : '';
+          return `${m.name}${dosageText}`;
+        }).join(language === 'cn' ? '、' : ', ');
+
+        const options = {
+          body: `${message}\n${t('Notifications.take')}${medDetails}`,
+          icon: '/icons/icon-192x192.png',
+          badge: '/icons/icon-192x192.png',
+          vibrate: [200, 100, 200],
+          tag: key,
+          renotify: true,
+        };
+
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          const registration = await navigator.serviceWorker.ready;
+          registration.showNotification(t('Notifications.timeToTake'), options);
+        } else {
+          new Notification(t('Notifications.timeToTake'), options);
         }
       }
     };
 
-    const interval = setInterval(checkNotifications, 30000); // 每30秒检查一次
-    checkNotifications(); // 立即检查一次
+    const interval = setInterval(checkScheduled, 30000);
+    void checkScheduled();
 
     return () => clearInterval(interval);
   }, [mounted, breakfastTime, lunchTime, dinnerTime, bedtimeTime, medications, language, t]);
