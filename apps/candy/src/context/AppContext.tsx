@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { dosageKeyForI18n } from '../dosageKey';
 import { copy } from '@candy/copy';
 import cnMessages from '../../messages/cn.json';
 import enMessages from '../../messages/en.json';
@@ -6,6 +7,15 @@ import enMessages from '../../messages/en.json';
 export type Theme = 'auto' | 'light' | 'dark';
 export type Language = 'cn' | 'en';
 export type TimeToTake = 'breakfast' | 'lunch' | 'dinner' | 'bedtime';
+
+export interface Medication {
+  id: string;
+  name: string;
+  times: TimeToTake[];
+  iconType: 'emoji' | 'image';
+  iconValue: string;
+  dosage?: string;
+}
 
 const messagesMap = {
   cn: cnMessages,
@@ -138,10 +148,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const relevantMeds = medications.filter(m => m.times.includes(key as TimeToTake));
             if (relevantMeds.length > 0) {
               const message = await copy(language);
-              const medNames = relevantMeds.map(m => m.name).join(language === 'cn' ? '、' : ', ');
+              const medDetails = relevantMeds.map(m => {
+                const dosageText = m.dosage
+                  ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(m.dosage)}`)})`
+                  : '';
+                return `${m.name}${dosageText}`;
+              }).join(language === 'cn' ? '、' : ', ');
               
               const options = {
-                body: `${message}\n${t('Notifications.take')}${medNames}`,
+                body: `${message}\n${t('Notifications.take')}${medDetails}`,
                 icon: '/icons/icon-192x192.png',
                 badge: '/icons/icon-192x192.png',
                 vibrate: [200, 100, 200],

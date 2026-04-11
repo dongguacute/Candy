@@ -16,6 +16,18 @@
     "confirm": "确认删除",
     "errorName": "请输入药物名称",
     "errorTime": "请选择服用时间",
+    "errorDosage": "请选择剂量",
+    "dosage": "剂量",
+    "dosageOptions": {
+      "quarter": "1/4 颗",
+      "half": "半颗",
+      "1": "1 颗",
+      "2": "2 颗",
+      "3": "3 颗",
+      "4": "4 颗",
+      "5": "5 颗",
+      "6": "6 颗"
+    },
     "done": "完成"
   },
   "Settings": {

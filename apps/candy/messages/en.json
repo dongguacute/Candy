@@ -16,6 +16,18 @@
     "confirm": "Confirm",
     "errorName": "Please enter medication name",
     "errorTime": "Please select time to take",
+    "errorDosage": "Please select dosage",
+    "dosage": "Dosage",
+    "dosageOptions": {
+      "quarter": "1/4 Pill",
+      "half": "1/2 Pill",
+      "1": "1 Pill",
+      "2": "2 Pills",
+      "3": "3 Pills",
+      "4": "4 Pills",
+      "5": "5 Pills",
+      "6": "6 Pills"
+    },
     "done": "Done"
   },
   "Settings": {
