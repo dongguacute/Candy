@@ -2,13 +2,15 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { MdList, MdSettings, MdLocalPharmacy } from 'react-icons/md';
+import { useAppContext } from '../context/AppContext';
 
 const Sidebar = () => {
   const router = useRouter();
+  const { language, t } = useAppContext();
 
   const navItems = [
-    { name: '药物列表', path: '/', icon: <MdList className="text-xl" /> },
-    { name: '设置', path: '/settings', icon: <MdSettings className="text-xl" /> },
+    { name: t('Sidebar.medications'), path: '/', icon: <MdList className="text-xl" /> },
+    { name: t('Sidebar.settings'), path: '/settings', icon: <MdSettings className="text-xl" /> },
   ];
 
   return (

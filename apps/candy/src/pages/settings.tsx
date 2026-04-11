@@ -7,6 +7,9 @@ export default function Settings() {
   const { 
     theme, 
     setTheme, 
+    language,
+    setLanguage,
+    t,
     clearAllData, 
     breakfastTime, 
     lunchTime, 
@@ -67,7 +70,7 @@ export default function Settings() {
   const handleClear = () => {
     clearAllData();
     setShowConfirm(false);
-    alert('所有数据已清除！');
+    alert(t('Settings.allCleared'));
   };
 
   return (
@@ -76,23 +79,48 @@ export default function Settings() {
         <div className="w-12 h-12 bg-[#FDEB9B] dark:bg-yellow-600 rounded-full flex items-center justify-center text-yellow-800 dark:text-yellow-100">
           <MdSettings className="text-2xl" />
         </div>
-        <h1 className="text-4xl font-extrabold text-yellow-900 dark:text-yellow-100 tracking-tight">设置</h1>
+        <h1 className="text-4xl font-extrabold text-yellow-900 dark:text-yellow-100 tracking-tight">
+          {t('Settings.title')}
+        </h1>
       </div>
       
       <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-10 mb-10 shadow-sm border-2 border-[#FDEB9B] dark:border-gray-700">
-        <h2 className="text-2xl font-bold mb-8 text-yellow-900 dark:text-yellow-100">外观</h2>
+        <h2 className="text-2xl font-bold mb-8 text-yellow-900 dark:text-yellow-100">
+          {t('Settings.appearance')}
+        </h2>
         <div className="flex gap-4">
-          {(['auto', 'light', 'dark'] as const).map((t) => (
+          {(['auto', 'light', 'dark'] as const).map((t_key) => (
             <button
-              key={t}
-              onClick={() => setTheme(t)}
+              key={t_key}
+              onClick={() => setTheme(t_key)}
               className={`px-8 py-4 rounded-full font-bold text-lg transition-all transform active:scale-95 border-2 ${
-                theme === t
+                theme === t_key
                   ? 'bg-[#FCD34D] text-yellow-950 border-[#FCD34D] shadow-md ring-4 ring-[#FDEB9B]/50 dark:bg-yellow-500 dark:border-yellow-500 dark:ring-yellow-600/30'
                   : 'bg-[#FFFDF0] dark:bg-gray-700 text-yellow-800 dark:text-gray-300 border-[#FDEB9B] dark:border-gray-600 hover:bg-[#FEF5C8] dark:hover:bg-gray-600'
               }`}
             >
-              {t === 'auto' ? '自动' : t === 'light' ? '浅色' : '深色'}
+              {t(`Settings.${t_key}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-10 mb-10 shadow-sm border-2 border-[#FDEB9B] dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-8 text-yellow-900 dark:text-yellow-100">
+          {t('Settings.language')}
+        </h2>
+        <div className="flex gap-4">
+          {(['cn', 'en'] as const).map((l) => (
+            <button
+              key={l}
+              onClick={() => setLanguage(l)}
+              className={`px-8 py-4 rounded-full font-bold text-lg transition-all transform active:scale-95 border-2 ${
+                language === l
+                  ? 'bg-[#FCD34D] text-yellow-950 border-[#FCD34D] shadow-md ring-4 ring-[#FDEB9B]/50 dark:bg-yellow-500 dark:border-yellow-500 dark:ring-yellow-600/30'
+                  : 'bg-[#FFFDF0] dark:bg-gray-700 text-yellow-800 dark:text-gray-300 border-[#FDEB9B] dark:border-gray-600 hover:bg-[#FEF5C8] dark:hover:bg-gray-600'
+              }`}
+            >
+              {l === 'cn' ? '简体中文' : 'English'}
             </button>
           ))}
         </div>
@@ -100,16 +128,20 @@ export default function Settings() {
 
       <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-10 mb-10 shadow-sm border-2 border-[#FDEB9B] dark:border-gray-700">
         <h2 className="text-2xl font-bold mb-8 text-yellow-900 dark:text-yellow-100 flex items-center gap-3">
-          <MdAccessTime className="text-3xl" /> 预设时间
+          <MdAccessTime className="text-3xl" /> {t('Settings.presetTimes')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex items-center justify-between p-6 bg-[#FFFDF0] dark:bg-gray-700/50 rounded-3xl border-2 border-[#FDEB9B] dark:border-gray-600">
             <div>
-              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">早餐时间</h3>
-              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">设置您的早餐时间</p>
+              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">
+                {t('Settings.breakfast')}
+              </h3>
+              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">
+                {t('Settings.breakfastDesc')}
+              </p>
             </div>
             <TimePicker
-              label="早餐"
+              label={t('Settings.breakfast')}
               value={tempTimes.breakfast}
               onChange={(v) => setTempTimes({ ...tempTimes, breakfast: v })}
             />
@@ -117,11 +149,15 @@ export default function Settings() {
 
           <div className="flex items-center justify-between p-6 bg-[#FFFDF0] dark:bg-gray-700/50 rounded-3xl border-2 border-[#FDEB9B] dark:border-gray-600">
             <div>
-              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">午餐时间</h3>
-              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">设置您的午餐时间</p>
+              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">
+                {t('Settings.lunch')}
+              </h3>
+              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">
+                {t('Settings.lunchDesc')}
+              </p>
             </div>
             <TimePicker
-              label="午餐"
+              label={t('Settings.lunch')}
               value={tempTimes.lunch}
               onChange={(v) => setTempTimes({ ...tempTimes, lunch: v })}
             />
@@ -129,11 +165,15 @@ export default function Settings() {
 
           <div className="flex items-center justify-between p-6 bg-[#FFFDF0] dark:bg-gray-700/50 rounded-3xl border-2 border-[#FDEB9B] dark:border-gray-600">
             <div>
-              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">晚餐时间</h3>
-              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">设置您的晚餐时间</p>
+              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">
+                {t('Settings.dinner')}
+              </h3>
+              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">
+                {t('Settings.dinnerDesc')}
+              </p>
             </div>
             <TimePicker
-              label="晚餐"
+              label={t('Settings.dinner')}
               value={tempTimes.dinner}
               onChange={(v) => setTempTimes({ ...tempTimes, dinner: v })}
             />
@@ -141,11 +181,15 @@ export default function Settings() {
 
           <div className="flex items-center justify-between p-6 bg-[#FFFDF0] dark:bg-gray-700/50 rounded-3xl border-2 border-[#FDEB9B] dark:border-gray-600">
             <div>
-              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">睡前时间</h3>
-              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">设置您的睡前时间</p>
+              <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-100">
+                {t('Settings.bedtime')}
+              </h3>
+              <p className="text-yellow-800/60 dark:text-gray-400 font-medium">
+                {t('Settings.bedtimeDesc')}
+              </p>
             </div>
             <TimePicker
-              label="睡前"
+              label={t('Settings.bedtime')}
               value={tempTimes.bedtime}
               onChange={(v) => setTempTimes({ ...tempTimes, bedtime: v })}
             />
@@ -168,13 +212,15 @@ export default function Settings() {
             ) : (
               <MdSave className="text-2xl" />
             )}
-            {isSaving ? '正在保存...' : '保存设置'}
+            {isSaving 
+              ? t('Settings.saving') 
+              : t('Settings.save')}
           </button>
 
           {showSavedMessage && (
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold animate-in fade-in slide-in-from-left-4">
               <MdCheckCircle className="text-2xl" />
-              <span>设置已成功保存！</span>
+              <span>{t('Settings.saved')}</span>
             </div>
           )}
         </div>
@@ -187,10 +233,10 @@ export default function Settings() {
         
         <div className="relative z-10">
           <h2 className="text-2xl font-bold mb-4 text-red-600 dark:text-red-400 flex items-center gap-3">
-            <MdWarning className="text-3xl" /> 危险区域
+            <MdWarning className="text-3xl" /> {t('Settings.dangerZone')}
           </h2>
           <p className="text-red-800/70 dark:text-red-300/70 mb-8 text-lg font-medium">
-            清除所有数据将删除您添加的所有药物和设置，此操作无法撤销。
+            {t('Settings.dangerDesc')}
           </p>
           
           {!showConfirm ? (
@@ -198,25 +244,25 @@ export default function Settings() {
               onClick={() => setShowConfirm(true)}
               className="flex items-center gap-3 px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-full shadow-md transition-all transform hover:scale-105"
             >
-              <MdDeleteForever className="text-2xl" /> 一键清除所有数据
+              <MdDeleteForever className="text-2xl" /> {t('Settings.clearAll')}
             </button>
           ) : (
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center bg-white/50 dark:bg-gray-800/50 p-6 rounded-[2rem] border border-red-200 dark:border-red-800/50">
               <span className="text-red-600 dark:text-red-400 font-bold text-lg flex items-center gap-2">
-                <MdWarning className="text-2xl" /> 确定要清除吗？
+                <MdWarning className="text-2xl" /> {t('Settings.areYouSure')}
               </span>
               <div className="flex gap-4">
                 <button
                   onClick={handleClear}
                   className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full shadow-md transition-all transform hover:scale-105"
                 >
-                  确认清除
+                  {t('Home.confirm')}
                 </button>
                 <button
                   onClick={() => setShowConfirm(false)}
                   className="px-8 py-3 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold rounded-full border-2 border-gray-200 dark:border-gray-600 transition-all"
                 >
-                  取消
+                  {t('Home.cancel')}
                 </button>
               </div>
             </div>

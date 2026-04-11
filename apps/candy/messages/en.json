@@ -1,0 +1,53 @@
+{
+  "Home": {
+    "title": "My Medications",
+    "addMedication": "Add Medication",
+    "noMedications": "No Medications Yet",
+    "addFirst": "Click the button above to add your first medication",
+    "medicationName": "Medication Name",
+    "placeholderName": "e.g. Amoxicillin",
+    "timeToTake": "Time to Take (Multiple)",
+    "icon": "Icon",
+    "uploadImage": "Upload Image",
+    "cancel": "Cancel",
+    "save": "Save Medication",
+    "confirmDelete": "Confirm Delete?",
+    "deleteWarning": "This action cannot be undone.",
+    "confirm": "Confirm",
+    "errorName": "Please enter medication name",
+    "errorTime": "Please select time to take"
+  },
+  "Settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "auto": "Auto",
+    "light": "Light",
+    "dark": "Dark",
+    "language": "Language",
+    "presetTimes": "Preset Times",
+    "breakfast": "Breakfast",
+    "breakfastDesc": "Set your breakfast time",
+    "lunch": "Lunch",
+    "lunchDesc": "Set your lunch time",
+    "dinner": "Dinner",
+    "dinnerDesc": "Set your dinner time",
+    "bedtime": "Bedtime",
+    "bedtimeDesc": "Set your bedtime",
+    "save": "Save Settings",
+    "saving": "Saving...",
+    "saved": "Settings saved successfully!",
+    "dangerZone": "Danger Zone",
+    "dangerDesc": "Clearing all data will delete all your medications and settings. This action cannot be undone.",
+    "clearAll": "Clear All Data",
+    "areYouSure": "Are you sure?",
+    "allCleared": "All data cleared!"
+  },
+  "Sidebar": {
+    "medications": "Medications",
+    "settings": "Settings"
+  },
+  "Notifications": {
+    "timeToTake": "It's time for your medicine!",
+    "take": "Take: "
+  }
+}

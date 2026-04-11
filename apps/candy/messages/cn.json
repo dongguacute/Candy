@@ -1,0 +1,53 @@
+{
+  "Home": {
+    "title": "我的药物",
+    "addMedication": "添加药物",
+    "noMedications": "暂无药物数据",
+    "addFirst": "点击右上角按钮添加您的第一种药物",
+    "medicationName": "药物名称",
+    "placeholderName": "例如：阿莫西林",
+    "timeToTake": "服用时间 (可多选)",
+    "icon": "图标",
+    "uploadImage": "上传图片",
+    "cancel": "取消",
+    "save": "保存药物",
+    "confirmDelete": "确认删除？",
+    "deleteWarning": "删除后将无法恢复该药物记录。",
+    "confirm": "确认删除",
+    "errorName": "请输入药物名称",
+    "errorTime": "请选择服用时间"
+  },
+  "Settings": {
+    "title": "设置",
+    "appearance": "外观",
+    "auto": "自动",
+    "light": "浅色",
+    "dark": "深色",
+    "language": "语言",
+    "presetTimes": "预设时间",
+    "breakfast": "早餐",
+    "breakfastDesc": "设置您的早餐时间",
+    "lunch": "午餐",
+    "lunchDesc": "设置您的午餐时间",
+    "dinner": "晚餐",
+    "dinnerDesc": "设置您的晚餐时间",
+    "bedtime": "睡前",
+    "bedtimeDesc": "设置您的睡前时间",
+    "save": "保存设置",
+    "saving": "正在保存...",
+    "saved": "设置已成功保存！",
+    "dangerZone": "危险区域",
+    "dangerDesc": "清除所有数据将删除您添加的所有药物和设置，此操作无法撤销。",
+    "clearAll": "一键清除所有数据",
+    "areYouSure": "确定要清除吗？",
+    "allCleared": "所有数据已清除！"
+  },
+  "Sidebar": {
+    "medications": "药物列表",
+    "settings": "设置"
+  },
+  "Notifications": {
+    "timeToTake": "吃药时间到啦！",
+    "take": "需服用："
+  }
+}

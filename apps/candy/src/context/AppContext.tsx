@@ -1,20 +1,23 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { copy } from '@candy/copy';
+import cnMessages from '../../messages/cn.json';
+import enMessages from '../../messages/en.json';
 
 export type Theme = 'auto' | 'light' | 'dark';
+export type Language = 'cn' | 'en';
 export type TimeToTake = 'breakfast' | 'lunch' | 'dinner' | 'bedtime';
 
-export interface Medication {
-  id: string;
-  name: string;
-  times: TimeToTake[];
-  iconType: 'emoji' | 'image';
-  iconValue: string;
-}
+const messagesMap = {
+  cn: cnMessages,
+  en: enMessages
+};
 
 interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
   medications: Medication[];
   breakfastTime: string;
   lunchTime: string;
@@ -33,6 +36,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>('auto');
+  const [language, setLanguageState] = useState<Language>('cn');
   const [medications, setMedications] = useState<Medication[]>([]);
   const [breakfastTime, setBreakfastTimeState] = useState<string>('08:00');
   const [lunchTime, setLunchTimeState] = useState<string>('12:00');
@@ -45,6 +49,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const storedTheme = localStorage.getItem('theme') as Theme;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (storedTheme) setThemeState(storedTheme);
+
+    const storedLanguage = localStorage.getItem('language') as Language;
+    if (storedLanguage) setLanguageState(storedLanguage);
     
     const storedMeds = localStorage.getItem('medications');
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -66,6 +73,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!mounted) return;
     localStorage.setItem('theme', theme);
+    localStorage.setItem('language', language);
     
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
@@ -129,23 +137,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (lastNotifiedRef.current[key] !== today) {
             const relevantMeds = medications.filter(m => m.times.includes(key as TimeToTake));
             if (relevantMeds.length > 0) {
-              const message = await copy();
-              const medNames = relevantMeds.map(m => m.name).join('、');
+              const message = await copy(language);
+              const medNames = relevantMeds.map(m => m.name).join(language === 'cn' ? '、' : ', ');
               
               const options = {
-                body: `${message}\n需服用：${medNames}`,
+                body: `${message}\n${t('Notifications.take')}${medNames}`,
                 icon: '/icons/icon-192x192.png',
                 badge: '/icons/icon-192x192.png',
                 vibrate: [200, 100, 200],
-                tag: notifyKey,
+                tag: key,
                 renotify: true
               };
 
               if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                 const registration = await navigator.serviceWorker.ready;
-                registration.showNotification('吃药时间到啦！', options);
+                registration.showNotification(t('Notifications.timeToTake'), options);
               } else {
-                new Notification('吃药时间到啦！', options);
+                new Notification(t('Notifications.timeToTake'), options);
               }
               
               lastNotifiedRef.current[key] = today;
@@ -162,11 +170,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [mounted, breakfastTime, lunchTime, dinnerTime, bedtimeTime, medications]);
 
   const setTheme = (newTheme: Theme) => setThemeState(newTheme);
+  const setLanguage = (newLang: Language) => setLanguageState(newLang);
 
   const setBreakfastTime = (newTime: string) => setBreakfastTimeState(newTime);
   const setLunchTime = (newTime: string) => setLunchTimeState(newTime);
   const setDinnerTime = (newTime: string) => setDinnerTimeState(newTime);
   const setBedtimeTime = (newTime: string) => setBedtimeTimeState(newTime);
+
+  const t = (path: string) => {
+    const keys = path.split('.');
+    let current: any = messagesMap[language];
+    for (const key of keys) {
+      if (current && current[key]) {
+        current = current[key];
+      } else {
+        return path;
+      }
+    }
+    return current;
+  };
 
   const addMedication = (med: Omit<Medication, 'id'>) => {
     setMedications([...medications, { ...med, id: Date.now().toString() }]);
@@ -179,6 +201,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const clearAllData = () => {
     setMedications([]);
     setThemeState('auto');
+    setLanguageState('cn');
     setBreakfastTimeState('08:00');
     setLunchTimeState('12:00');
     setDinnerTimeState('19:00');
@@ -195,6 +218,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider value={{ 
       theme, 
       setTheme, 
+      language,
+      setLanguage,
+      t,
       medications, 
       breakfastTime, 
       lunchTime, 
