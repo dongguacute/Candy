@@ -56,6 +56,23 @@ const messagesMap = {
   en: enMessages
 };
 
+function isValidLanguage(value: string | null): value is Language {
+  return value === 'cn' || value === 'en';
+}
+
+/** 无本地偏好时：浏览器语言为中文系 → cn，否则 en */
+function detectBrowserLanguage(): Language {
+  if (typeof navigator === 'undefined') return 'en';
+  const list =
+    typeof navigator.languages !== 'undefined' && navigator.languages.length > 0
+      ? navigator.languages
+      : [navigator.language];
+  for (const tag of list) {
+    if (tag.toLowerCase().startsWith('zh')) return 'cn';
+  }
+  return 'en';
+}
+
 interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
@@ -83,7 +100,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>('auto');
-  const [language, setLanguageState] = useState<Language>('cn');
+  const [language, setLanguageState] = useState<Language>('en');
   const [medications, setMedications] = useState<Medication[]>([]);
   const [breakfastTime, setBreakfastTimeState] = useState<string>('08:00');
   const [lunchTime, setLunchTimeState] = useState<string>('12:00');
@@ -119,8 +136,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const storedTheme = localStorage.getItem('theme') as Theme;
     if (storedTheme) setThemeState(storedTheme);
 
-    const storedLanguage = localStorage.getItem('language') as Language;
-    if (storedLanguage) setLanguageState(storedLanguage);
+    const storedLanguage = localStorage.getItem('language');
+    if (isValidLanguage(storedLanguage)) {
+      setLanguageState(storedLanguage);
+    } else {
+      setLanguageState(detectBrowserLanguage());
+    }
     
     const storedMeds = localStorage.getItem('medications');
     if (storedMeds) setMedications(JSON.parse(storedMeds));
@@ -191,7 +212,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else {
       root.classList.add(theme);
     }
-  }, [theme, mounted]);
+  }, [theme, language, mounted]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -402,7 +423,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const clearAllData = () => {
     setMedications([]);
     setThemeState('auto');
-    setLanguageState('cn');
+    localStorage.removeItem('language');
+    setLanguageState(detectBrowserLanguage());
     setBreakfastTimeState('08:00');
     setLunchTimeState('12:00');
     setDinnerTimeState('19:00');
