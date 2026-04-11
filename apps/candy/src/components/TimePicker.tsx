@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MdAccessTime, MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md';
+import { useAppContext } from '../context/AppContext';
 
 interface TimePickerProps {
   value: string;
@@ -8,6 +9,7 @@ interface TimePickerProps {
 }
 
 export const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label }) => {
+  const { t } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -171,7 +173,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label }
               onClick={() => setIsOpen(false)}
               className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold rounded-full text-sm transition-all shadow-sm hover:shadow-md"
             >
-              完成
+              {t('Home.done')}
             </button>
           </div>
         </div>

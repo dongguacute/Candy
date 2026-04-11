@@ -15,7 +15,8 @@
     "deleteWarning": "This action cannot be undone.",
     "confirm": "Confirm",
     "errorName": "Please enter medication name",
-    "errorTime": "Please select time to take"
+    "errorTime": "Please select time to take",
+    "done": "Done"
   },
   "Settings": {
     "title": "Settings",
