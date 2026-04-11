@@ -33,7 +33,7 @@
   },
   "Pending": {
     "title": "To take",
-    "hint": "Medications appear here once the current time reaches or passes your preset time. Check off when taken. Entries not checked within 6 hours are removed to make room for the next reminder.",
+    "hint": "Medications appear here once the current time reaches or passes your preset time. Check off after you have taken the dose. Entries not checked within 6 hours are removed to make room for the next reminder.",
     "taken": "Taken",
     "slot": "Time",
     "empty": "Nothing pending yet. Items appear here after the preset time."

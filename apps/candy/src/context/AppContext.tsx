@@ -69,6 +69,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [pendingIntake, setPendingIntake] = useState<PendingIntakeItem[]>([]);
   const [mounted, setMounted] = useState(false);
   const lastNotifiedRef = useRef<Record<string, string>>({});
+  /** 今日已点击「已服用」的 pending id，避免清除后又被定时检测加回 */
+  const completedIntakeIdsRef = useRef<Set<string>>(new Set());
+
+  const persistCompletedIntakeIds = useCallback(() => {
+    localStorage.setItem(
+      'completedIntakeIds',
+      JSON.stringify([...completedIntakeIdsRef.current])
+    );
+  }, []);
 
   const t = useCallback((path: string) => {
     const keys = path.split('.');
@@ -94,6 +103,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (storedMeds) setMedications(JSON.parse(storedMeds));
 
     const storedPending = localStorage.getItem('pendingIntake');
+    const todayStr = new Date().toDateString();
     if (storedPending) {
       try {
         const parsed: PendingIntakeItem[] = JSON.parse(storedPending);
@@ -110,6 +120,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return true;
           })
         );
+      } catch {
+        // ignore
+      }
+    }
+
+    const storedCompleted = localStorage.getItem('completedIntakeIds');
+    if (storedCompleted) {
+      try {
+        const parsed: string[] = JSON.parse(storedCompleted);
+        completedIntakeIdsRef.current = new Set(parsed.filter((id) => id.endsWith(todayStr)));
+        if (completedIntakeIdsRef.current.size !== parsed.length) {
+          localStorage.setItem(
+            'completedIntakeIds',
+            JSON.stringify([...completedIntakeIdsRef.current])
+          );
+        }
       } catch {
         // ignore
       }
@@ -203,6 +229,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bedtime: bedtimeTime,
       };
 
+      // 跨日：只保留「日期后缀为今日」的已完成 id，并落盘
+      const completed = completedIntakeIdsRef.current;
+      let completedPruned = false;
+      for (const id of [...completed]) {
+        if (!id.endsWith(today)) {
+          completed.delete(id);
+          completedPruned = true;
+        }
+      }
+      if (completedPruned) {
+        persistCompletedIntakeIds();
+      }
+
       setPendingIntake((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
         const toAdd: PendingIntakeItem[] = [];
@@ -214,6 +253,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           for (const med of relevantMeds) {
             const id = `${med.id}-${slot}-${today}`;
             if (existingIds.has(id)) continue;
+            if (completed.has(id)) continue;
             toAdd.push({
               id,
               medicationId: med.id,
@@ -231,7 +271,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (currentTime !== scheduledTime) continue;
         if (lastNotifiedRef.current[key] === today) continue;
 
-        const relevantMeds = medications.filter((m) => m.times.includes(key as TimeToTake));
+        const slot = key as TimeToTake;
+        const relevantMeds = medications.filter((m) => {
+          if (!m.times.includes(slot)) return false;
+          return !completedIntakeIdsRef.current.has(`${m.id}-${slot}-${today}`);
+        });
         if (relevantMeds.length === 0) continue;
 
         lastNotifiedRef.current[key] = today;
@@ -270,7 +314,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     void checkScheduled();
 
     return () => clearInterval(interval);
-  }, [mounted, breakfastTime, lunchTime, dinnerTime, bedtimeTime, medications, language, t]);
+  }, [
+    mounted,
+    breakfastTime,
+    lunchTime,
+    dinnerTime,
+    bedtimeTime,
+    medications,
+    language,
+    t,
+    persistCompletedIntakeIds,
+  ]);
 
   const setTheme = (newTheme: Theme) => setThemeState(newTheme);
   const setLanguage = (newLang: Language) => setLanguageState(newLang);
@@ -293,10 +347,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const removeMedication = (id: string) => {
     setMedications(medications.filter(m => m.id !== id));
     setPendingIntake((prev) => prev.filter((p) => p.medicationId !== id));
+    let removed = false;
+    for (const cid of [...completedIntakeIdsRef.current]) {
+      if (cid.startsWith(`${id}-`)) {
+        completedIntakeIdsRef.current.delete(cid);
+        removed = true;
+      }
+    }
+    if (removed) persistCompletedIntakeIds();
   };
 
   const markPendingIntakeDone = (itemId: string) => {
     setPendingIntake((prev) => prev.filter((p) => p.id !== itemId));
+    completedIntakeIdsRef.current.add(itemId);
+    persistCompletedIntakeIds();
   };
 
   const clearAllData = () => {
@@ -314,6 +378,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('dinnerTime');
     localStorage.removeItem('bedtimeTime');
     localStorage.removeItem('pendingIntake');
+    localStorage.removeItem('completedIntakeIds');
+    completedIntakeIdsRef.current = new Set();
     setPendingIntake([]);
   };
 
