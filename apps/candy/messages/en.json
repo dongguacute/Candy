@@ -2,6 +2,7 @@
   "Home": {
     "title": "My Medications",
     "addMedication": "Add Medication",
+    "editMedication": "Edit Medication",
     "noMedications": "No Medications Yet",
     "addFirst": "Click the button above to add your first medication",
     "medicationName": "Medication Name",
@@ -30,6 +31,13 @@
     },
     "done": "Done"
   },
+  "Pending": {
+    "title": "To take",
+    "hint": "Items appear here when it’s time. Check off when taken. Entries not checked within 6 hours are removed to make room for the next reminder.",
+    "taken": "Taken",
+    "slot": "Time",
+    "empty": "Nothing pending yet. Items will show up here when it’s time."
+  },
   "Settings": {
     "title": "Settings",
     "appearance": "Appearance",
@@ -57,6 +65,7 @@
   },
   "Sidebar": {
     "medications": "Medications",
+    "pending": "To take",
     "settings": "Settings"
   },
   "Notifications": {

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, useState, useRef } from 'react';
 import { dosageKeyForI18n } from '../dosageKey';
 import { copy } from '@candy/copy';
 import cnMessages from '../../messages/cn.json';
@@ -15,6 +15,17 @@ export interface Medication {
   iconType: 'emoji' | 'image';
   iconValue: string;
   dosage?: string;
+}
+
+/** 到点后出现在待服用列表；超过此时长未勾选则自动清除（毫秒） */
+export const PENDING_INTAKE_TTL_MS = 6 * 60 * 60 * 1000;
+
+export interface PendingIntakeItem {
+  id: string;
+  medicationId: string;
+  timeSlot: TimeToTake;
+  /** 该次提醒写入列表的时间 */
+  createdAt: number;
 }
 
 const messagesMap = {
@@ -38,8 +49,11 @@ interface AppContextType {
   setDinnerTime: (time: string) => void;
   setBedtimeTime: (time: string) => void;
   addMedication: (med: Omit<Medication, 'id'>) => void;
+  updateMedication: (id: string, med: Omit<Medication, 'id'>) => void;
   removeMedication: (id: string) => void;
   clearAllData: () => void;
+  pendingIntake: PendingIntakeItem[];
+  markPendingIntakeDone: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -52,20 +66,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [lunchTime, setLunchTimeState] = useState<string>('12:00');
   const [dinnerTime, setDinnerTimeState] = useState<string>('19:00');
   const [bedtimeTime, setBedtimeTimeState] = useState<string>('22:00');
+  const [pendingIntake, setPendingIntake] = useState<PendingIntakeItem[]>([]);
   const [mounted, setMounted] = useState(false);
   const lastNotifiedRef = useRef<Record<string, string>>({});
 
+  const t = useCallback((path: string) => {
+    const keys = path.split('.');
+    let current: unknown = messagesMap[language];
+    for (const key of keys) {
+      if (current && typeof current === 'object' && key in (current as object)) {
+        current = (current as Record<string, unknown>)[key];
+      } else {
+        return path;
+      }
+    }
+    return typeof current === 'string' ? current : path;
+  }, [language]);
+
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (storedTheme) setThemeState(storedTheme);
 
     const storedLanguage = localStorage.getItem('language') as Language;
     if (storedLanguage) setLanguageState(storedLanguage);
     
     const storedMeds = localStorage.getItem('medications');
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (storedMeds) setMedications(JSON.parse(storedMeds));
+
+    const storedPending = localStorage.getItem('pendingIntake');
+    if (storedPending) {
+      try {
+        const parsed: PendingIntakeItem[] = JSON.parse(storedPending);
+        const now = Date.now();
+        let medIds: Set<string> | null = null;
+        if (storedMeds) {
+          const meds: Medication[] = JSON.parse(storedMeds);
+          medIds = new Set(meds.map((m) => m.id));
+        }
+        setPendingIntake(
+          parsed.filter((p) => {
+            if (now - p.createdAt > PENDING_INTAKE_TTL_MS) return false;
+            if (medIds && !medIds.has(p.medicationId)) return false;
+            return true;
+          })
+        );
+      } catch {
+        // ignore
+      }
+    }
 
     const storedBreakfastTime = localStorage.getItem('breakfastTime');
     if (storedBreakfastTime) setBreakfastTimeState(storedBreakfastTime);
@@ -103,6 +151,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     if (!mounted) return;
+    localStorage.setItem('pendingIntake', JSON.stringify(pendingIntake));
+  }, [pendingIntake, mounted]);
+
+  /** 超过 6 小时未勾选的条目自动移除 */
+  useEffect(() => {
+    if (!mounted) return;
+    const prune = () => {
+      const now = Date.now();
+      setPendingIntake((prev) =>
+        prev.filter((p) => now - p.createdAt <= PENDING_INTAKE_TTL_MS)
+      );
+    };
+    const interval = setInterval(prune, 30000);
+    prune();
+    return () => clearInterval(interval);
+  }, [mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
     localStorage.setItem('breakfastTime', breakfastTime);
     localStorage.setItem('lunchTime', lunchTime);
     localStorage.setItem('dinnerTime', dinnerTime);
@@ -122,9 +189,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 注册 Service Worker 并在后台运行
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
-        // SW 已就绪
-      });
+      void navigator.serviceWorker.ready;
     }
 
     const checkNotifications = async () => {
@@ -147,6 +212,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (lastNotifiedRef.current[key] !== today) {
             const relevantMeds = medications.filter(m => m.times.includes(key as TimeToTake));
             if (relevantMeds.length > 0) {
+              lastNotifiedRef.current[key] = today;
+              const slot = key as TimeToTake;
+              setPendingIntake((prev) => {
+                const idsToReplace = new Set(
+                  relevantMeds.map((m) => `${m.id}-${slot}-${today}`)
+                );
+                const rest = prev.filter((p) => !idsToReplace.has(p.id));
+                const added: PendingIntakeItem[] = relevantMeds.map((med) => ({
+                  id: `${med.id}-${slot}-${today}`,
+                  medicationId: med.id,
+                  timeSlot: slot,
+                  createdAt: Date.now(),
+                }));
+                return [...rest, ...added];
+              });
+
               const message = await copy(language);
               const medDetails = relevantMeds.map(m => {
                 const dosageText = m.dosage
@@ -170,8 +251,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               } else {
                 new Notification(t('Notifications.timeToTake'), options);
               }
-              
-              lastNotifiedRef.current[key] = today;
             }
           }
         }
@@ -182,7 +261,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     checkNotifications(); // 立即检查一次
 
     return () => clearInterval(interval);
-  }, [mounted, breakfastTime, lunchTime, dinnerTime, bedtimeTime, medications]);
+  }, [mounted, breakfastTime, lunchTime, dinnerTime, bedtimeTime, medications, language, t]);
 
   const setTheme = (newTheme: Theme) => setThemeState(newTheme);
   const setLanguage = (newLang: Language) => setLanguageState(newLang);
@@ -192,25 +271,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setDinnerTime = (newTime: string) => setDinnerTimeState(newTime);
   const setBedtimeTime = (newTime: string) => setBedtimeTimeState(newTime);
 
-  const t = (path: string) => {
-    const keys = path.split('.');
-    let current: any = messagesMap[language];
-    for (const key of keys) {
-      if (current && current[key]) {
-        current = current[key];
-      } else {
-        return path;
-      }
-    }
-    return current;
-  };
-
   const addMedication = (med: Omit<Medication, 'id'>) => {
     setMedications([...medications, { ...med, id: Date.now().toString() }]);
   };
 
+  const updateMedication = (id: string, updates: Omit<Medication, 'id'>) => {
+    setMedications((prev) =>
+      prev.map((m) => (m.id === id ? { ...updates, id } : m))
+    );
+  };
+
   const removeMedication = (id: string) => {
     setMedications(medications.filter(m => m.id !== id));
+    setPendingIntake((prev) => prev.filter((p) => p.medicationId !== id));
+  };
+
+  const markPendingIntakeDone = (itemId: string) => {
+    setPendingIntake((prev) => prev.filter((p) => p.id !== itemId));
   };
 
   const clearAllData = () => {
@@ -227,6 +304,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('lunchTime');
     localStorage.removeItem('dinnerTime');
     localStorage.removeItem('bedtimeTime');
+    localStorage.removeItem('pendingIntake');
+    setPendingIntake([]);
   };
 
   return (
@@ -245,9 +324,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setLunchTime, 
       setDinnerTime, 
       setBedtimeTime, 
-      addMedication, 
+      addMedication,
+      updateMedication,
       removeMedication, 
-      clearAllData 
+      clearAllData,
+      pendingIntake,
+      markPendingIntakeDone,
     }}>
       {children}
     </AppContext.Provider>
