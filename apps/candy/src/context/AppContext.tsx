@@ -102,6 +102,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!mounted) return;
 
+    // 注册 Service Worker 并在后台运行
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((registration) => {
+        // SW 已就绪
+      });
+    }
+
     const checkNotifications = async () => {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
@@ -125,10 +132,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const message = await copy();
               const medNames = relevantMeds.map(m => m.name).join('、');
               
-              new Notification('吃药时间到啦！', {
+              const options = {
                 body: `${message}\n需服用：${medNames}`,
-                icon: '/favicon.ico',
-              });
+                icon: '/icons/icon-192x192.png',
+                badge: '/icons/icon-192x192.png',
+                vibrate: [200, 100, 200],
+                tag: notifyKey,
+                renotify: true
+              };
+
+              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                const registration = await navigator.serviceWorker.ready;
+                registration.showNotification('吃药时间到啦！', options);
+              } else {
+                new Notification('吃药时间到啦！', options);
+              }
               
               lastNotifiedRef.current[key] = today;
             }
