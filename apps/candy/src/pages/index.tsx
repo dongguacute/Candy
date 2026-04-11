@@ -101,9 +101,15 @@ export default function Home() {
       iconValue,
     };
     if (medModal?.type === 'edit') {
-      updateMedication(medModal.id, payload);
+      if (!updateMedication(medModal.id, payload)) {
+        alert(t('Home.errorDuplicate'));
+        return;
+      }
     } else {
-      addMedication(payload);
+      if (!addMedication(payload)) {
+        alert(t('Home.errorDuplicate'));
+        return;
+      }
     }
     setMedModal(null);
   };

@@ -16,6 +16,7 @@
     "deleteWarning": "删除后将无法恢复该药物记录。",
     "confirm": "确认删除",
     "errorName": "请输入药物名称",
+    "errorDuplicate": "已存在信息完全相同的药物，请勿重复添加。",
     "errorTime": "请选择服用时间",
     "errorDosage": "请选择剂量",
     "dosage": "剂量",

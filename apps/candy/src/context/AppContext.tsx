@@ -28,6 +28,29 @@ export interface PendingIntakeItem {
   createdAt: number;
 }
 
+/** 比较两条药物数据是否完全一致（忽略 id） */
+function medicationDataEqual(
+  a: Omit<Medication, 'id'>,
+  b: Omit<Medication, 'id'>
+): boolean {
+  if (a.name.trim() !== b.name.trim()) return false;
+  if (a.iconType !== b.iconType || a.iconValue !== b.iconValue) return false;
+  if ((a.dosage ?? '1') !== (b.dosage ?? '1')) return false;
+  const ta = [...a.times].sort().join('\0');
+  const tb = [...b.times].sort().join('\0');
+  return ta === tb;
+}
+
+function toMedicationData(m: Medication): Omit<Medication, 'id'> {
+  return {
+    name: m.name,
+    times: m.times,
+    dosage: m.dosage,
+    iconType: m.iconType,
+    iconValue: m.iconValue,
+  };
+}
+
 const messagesMap = {
   cn: cnMessages,
   en: enMessages
@@ -48,8 +71,8 @@ interface AppContextType {
   setLunchTime: (time: string) => void;
   setDinnerTime: (time: string) => void;
   setBedtimeTime: (time: string) => void;
-  addMedication: (med: Omit<Medication, 'id'>) => void;
-  updateMedication: (id: string, med: Omit<Medication, 'id'>) => void;
+  addMedication: (med: Omit<Medication, 'id'>) => boolean;
+  updateMedication: (id: string, med: Omit<Medication, 'id'>) => boolean;
   removeMedication: (id: string) => void;
   clearAllData: () => void;
   pendingIntake: PendingIntakeItem[];
@@ -335,13 +358,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setBedtimeTime = (newTime: string) => setBedtimeTimeState(newTime);
 
   const addMedication = (med: Omit<Medication, 'id'>) => {
-    setMedications([...medications, { ...med, id: Date.now().toString() }]);
+    let isDuplicate = false;
+    setMedications((prev) => {
+      isDuplicate = prev.some((m) => medicationDataEqual(med, toMedicationData(m)));
+      if (isDuplicate) return prev;
+      return [...prev, { ...med, id: Date.now().toString() }];
+    });
+    return !isDuplicate;
   };
 
   const updateMedication = (id: string, updates: Omit<Medication, 'id'>) => {
-    setMedications((prev) =>
-      prev.map((m) => (m.id === id ? { ...updates, id } : m))
-    );
+    let isDuplicate = false;
+    setMedications((prev) => {
+      isDuplicate = prev.some(
+        (m) =>
+          m.id !== id && medicationDataEqual(updates, toMedicationData(m))
+      );
+      if (isDuplicate) return prev;
+      return prev.map((m) => (m.id === id ? { ...updates, id } : m));
+    });
+    return !isDuplicate;
   };
 
   const removeMedication = (id: string) => {

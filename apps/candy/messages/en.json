@@ -16,6 +16,7 @@
     "deleteWarning": "This action cannot be undone.",
     "confirm": "Confirm",
     "errorName": "Please enter medication name",
+    "errorDuplicate": "A medication with identical details already exists.",
     "errorTime": "Please select time to take",
     "errorDosage": "Please select dosage",
     "dosage": "Dosage",
