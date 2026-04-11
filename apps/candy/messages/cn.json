@@ -62,7 +62,11 @@
     "dangerDesc": "清除所有数据将删除您添加的所有药物和设置，此操作无法撤销。",
     "clearAll": "一键清除所有数据",
     "areYouSure": "确定要清除吗？",
-    "allCleared": "所有数据已清除！"
+    "allCleared": "所有数据已清除！",
+    "disclaimerTitle": "免责声明",
+    "disclaimerBody": "本应用仅供个人用药提醒与信息整理，不构成医疗建议、诊断或治疗意见。用药请严格遵医嘱；如有不适请及时就医。开发者不对因使用本应用而产生的任何直接或间接后果承担责任。",
+    "sourceOnGitHub": "GitHub 开源仓库",
+    "linkOpensNewTab": "在新标签页打开"
   },
   "Sidebar": {
     "medications": "药物列表",

@@ -115,25 +115,25 @@ export default function Home() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-extrabold text-yellow-900 dark:text-yellow-100 tracking-tight">
+    <div className="mx-auto max-w-5xl">
+      <div className="mb-6 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-extrabold tracking-tight text-yellow-900 dark:text-yellow-100 sm:text-4xl">
           {t('Home.title')}
         </h1>
         <button
           type="button"
           onClick={openAddModal}
-          className="flex items-center gap-2 px-6 py-3 bg-[#FDEB9B] hover:bg-[#FCD34D] text-yellow-900 font-bold rounded-full shadow-sm transition-all transform hover:scale-105 dark:bg-yellow-600 dark:text-yellow-50 dark:hover:bg-yellow-500"
+          className="flex w-full shrink-0 items-center justify-center gap-2 rounded-full bg-[#FDEB9B] px-5 py-3 font-bold text-yellow-900 shadow-sm transition-all hover:bg-[#FCD34D] active:scale-[0.98] dark:bg-yellow-600 dark:text-yellow-50 dark:hover:bg-yellow-500 sm:w-auto sm:px-6 sm:hover:scale-105"
         >
           <MdAdd className="text-xl" /> {t('Home.addMedication')}
         </button>
       </div>
 
       {medModal && (
-        <div className="fixed inset-0 bg-yellow-950/20 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
-          <div className="bg-[#FFFDF0] dark:bg-gray-800 rounded-[2.5rem] p-8 w-full max-w-md max-h-[90vh] min-h-0 flex flex-col shadow-2xl border-4 border-[#FDEB9B] dark:border-gray-700">
-            <div className="flex justify-between items-start gap-4 flex-shrink-0 mb-6">
-              <h2 className="text-2xl font-bold text-yellow-900 dark:text-yellow-100 leading-tight pr-2">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-yellow-950/20 p-0 backdrop-blur-sm transition-opacity sm:items-center sm:p-4">
+          <div className="flex max-h-[min(92dvh,100%)] min-h-0 w-full max-w-md flex-col rounded-t-[2rem] border-4 border-[#FDEB9B] bg-[#FFFDF0] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl dark:border-gray-700 dark:bg-gray-800 sm:rounded-[2.5rem] sm:p-8 sm:pb-8">
+            <div className="mb-4 flex flex-shrink-0 items-start justify-between gap-4 sm:mb-6">
+              <h2 className="pr-2 text-xl font-bold leading-tight text-yellow-900 dark:text-yellow-100 sm:text-2xl">
                 {medModal.type === 'edit' ? t('Home.editMedication') : t('Home.addMedication')}
               </h2>
               <button
@@ -146,7 +146,7 @@ export default function Home() {
             </div>
 
             <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-              <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar space-y-8">
+              <div className="custom-scrollbar min-h-0 flex-1 space-y-6 overflow-y-auto sm:space-y-8">
               <div>
                 <label className="block text-sm font-bold text-yellow-800 dark:text-yellow-200 mb-3 ml-2">
                   {t('Home.medicationName')}
@@ -164,13 +164,13 @@ export default function Home() {
                 <label className="block text-sm font-bold text-yellow-800 dark:text-yellow-200 mb-3 ml-2">
                   {t('Home.timeToTake')}
                 </label>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {timeOptions.map(option => (
                     <button
                       type="button"
                       key={option.value}
                       onClick={() => handleTimeToggle(option.value)}
-                      className={`px-6 py-3 rounded-full text-sm font-bold transition-all transform active:scale-95 ${
+                      className={`rounded-full px-4 py-2.5 text-xs font-bold transition-all active:scale-95 sm:px-6 sm:py-3 sm:text-sm ${
                         times.includes(option.value)
                           ? 'bg-[#FCD34D] text-yellow-900 shadow-md ring-2 ring-[#FCD34D] ring-offset-2 ring-offset-[#FFFDF0] dark:ring-offset-gray-800 dark:bg-yellow-500 dark:text-yellow-950'
                           : 'bg-white dark:bg-gray-700 text-yellow-700 dark:text-gray-300 border-2 border-[#FDEB9B] dark:border-gray-600 hover:bg-[#FEF5C8] dark:hover:bg-gray-600'
@@ -186,13 +186,13 @@ export default function Home() {
                 <label className="block text-sm font-bold text-yellow-800 dark:text-yellow-200 mb-3 ml-2">
                   {t('Home.dosage')}
                 </label>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {dosageOptions.map(option => (
                     <button
                       type="button"
                       key={option.value}
                       onClick={() => setDosage(option.value)}
-                      className={`px-6 py-3 rounded-full text-sm font-bold transition-all transform active:scale-95 ${
+                      className={`rounded-full px-4 py-2.5 text-xs font-bold transition-all active:scale-95 sm:px-6 sm:py-3 sm:text-sm ${
                         dosage === option.value
                           ? 'bg-[#FCD34D] text-yellow-900 shadow-md ring-2 ring-[#FCD34D] ring-offset-2 ring-offset-[#FFFDF0] dark:ring-offset-gray-800 dark:bg-yellow-500 dark:text-yellow-950'
                           : 'bg-white dark:bg-gray-700 text-yellow-700 dark:text-gray-300 border-2 border-[#FDEB9B] dark:border-gray-600 hover:bg-[#FEF5C8] dark:hover:bg-gray-600'
@@ -208,7 +208,7 @@ export default function Home() {
                 <label className="block text-sm font-bold text-yellow-800 dark:text-yellow-200 mb-3 ml-2">
                   {t('Home.icon')}
                 </label>
-                <div className="flex items-center gap-6 bg-white dark:bg-gray-700 p-4 rounded-[2rem] border-2 border-[#FDEB9B] dark:border-gray-600">
+                <div className="flex flex-col items-stretch gap-4 rounded-[1.5rem] border-2 border-[#FDEB9B] bg-white p-4 dark:border-gray-600 dark:bg-gray-700 sm:flex-row sm:items-center sm:gap-6 sm:rounded-[2rem]">
                   <div className="w-20 h-20 rounded-full border-4 border-[#FDEB9B] dark:border-gray-600 flex items-center justify-center overflow-hidden bg-[#FFFDF0] dark:bg-gray-800 shadow-inner flex-shrink-0">
                     {iconType === 'emoji' ? (
                       <span className="text-4xl">{iconValue}</span>
@@ -257,17 +257,17 @@ export default function Home() {
               </div>
               </div>
 
-              <div className="flex-shrink-0 flex justify-end gap-4 pt-6 mt-2 border-t-2 border-[#FDEB9B]/60 dark:border-gray-600">
+              <div className="mt-2 flex flex-shrink-0 flex-col-reverse gap-3 border-t-2 border-[#FDEB9B]/60 pt-5 dark:border-gray-600 sm:flex-row sm:justify-end sm:gap-4 sm:pt-6">
                 <button
                   type="button"
                   onClick={() => setMedModal(null)}
-                  className="px-8 py-4 rounded-full font-bold text-yellow-700 dark:text-gray-300 hover:bg-[#FEF5C8] dark:hover:bg-gray-700 transition-colors"
+                  className="rounded-full px-6 py-3.5 font-bold text-yellow-700 transition-colors hover:bg-[#FEF5C8] dark:text-gray-300 dark:hover:bg-gray-700 sm:px-8 sm:py-4"
                 >
                   {t('Home.cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-4 bg-[#FCD34D] hover:bg-[#FBBF24] text-yellow-900 font-bold rounded-full shadow-md transition-all transform hover:scale-105 dark:bg-yellow-500 dark:text-yellow-950"
+                  className="rounded-full bg-[#FCD34D] px-6 py-3.5 font-bold text-yellow-900 shadow-md transition-all hover:bg-[#FBBF24] active:scale-[0.98] dark:bg-yellow-500 dark:text-yellow-950 sm:px-8 sm:py-4 sm:hover:scale-105"
                 >
                   {t('Home.save')}
                 </button>
@@ -278,12 +278,12 @@ export default function Home() {
       )}
 
       {medications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 text-yellow-700/50 dark:text-gray-500">
-          <MdMedication className="text-8xl mb-6 text-[#FDEB9B] dark:text-gray-700" />
-          <p className="text-2xl font-bold mb-2 text-yellow-800/60 dark:text-gray-400">
+        <div className="flex flex-col items-center justify-center py-16 text-yellow-700/50 dark:text-gray-500 sm:py-32">
+          <MdMedication className="mb-6 text-6xl text-[#FDEB9B] dark:text-gray-700 sm:text-8xl" />
+          <p className="mb-2 text-center text-xl font-bold text-yellow-800/60 dark:text-gray-400 sm:text-2xl">
             {t('Home.noMedications')}
           </p>
-          <p className="text-lg">
+          <p className="text-center text-base sm:text-lg">
             {t('Home.addFirst')}
           </p>
         </div>
@@ -350,8 +350,8 @@ export default function Home() {
 
       {/* Delete Confirmation Modal */}
       {medToDelete && (
-        <div className="fixed inset-0 bg-yellow-950/20 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
-          <div className="bg-[#FFFDF0] dark:bg-gray-800 rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl border-4 border-[#FDEB9B] dark:border-gray-700 text-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-yellow-950/20 p-0 backdrop-blur-sm transition-opacity sm:items-center sm:p-4">
+          <div className="w-full max-w-sm rounded-t-[2rem] border-4 border-[#FDEB9B] bg-[#FFFDF0] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center shadow-2xl dark:border-gray-700 dark:bg-gray-800 sm:rounded-[2.5rem] sm:p-8 sm:pb-8">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <MdWarning className="text-3xl" />
             </div>
@@ -361,10 +361,10 @@ export default function Home() {
             <p className="text-yellow-800/70 dark:text-gray-400 mb-8 font-medium">
               {t('Home.deleteWarning')}
             </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-center sm:gap-4">
               <button
                 onClick={() => setMedToDelete(null)}
-                className="px-6 py-3 rounded-full font-bold text-yellow-700 dark:text-gray-300 hover:bg-[#FEF5C8] dark:hover:bg-gray-700 transition-colors"
+                className="rounded-full px-6 py-3 font-bold text-yellow-700 transition-colors hover:bg-[#FEF5C8] dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 {t('Home.cancel')}
               </button>
@@ -373,7 +373,7 @@ export default function Home() {
                   removeMedication(medToDelete);
                   setMedToDelete(null);
                 }}
-                className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-full shadow-md transition-all transform hover:scale-105"
+                className="rounded-full bg-red-500 px-6 py-3 font-bold text-white shadow-md transition-all hover:bg-red-600 active:scale-[0.98] sm:hover:scale-105"
               >
                 {t('Home.confirm')}
               </button>

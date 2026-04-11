@@ -1,35 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { MdList, MdSettings, MdLocalPharmacy, MdPendingActions } from 'react-icons/md';
-import { useAppContext } from '../context/AppContext';
+import { MdLocalPharmacy } from 'react-icons/md';
+import { useNavItems } from './navItems';
 
 const Sidebar = () => {
   const router = useRouter();
-  const { t, pendingIntake, medications } = useAppContext();
-
-  const pendingCount = pendingIntake.filter((item) =>
-    medications.some((m) => m.id === item.medicationId)
-  ).length;
-
-  const navItems: {
-    name: string;
-    path: string;
-    icon: React.ReactNode;
-    badge?: number;
-  }[] = [
-    { name: t('Sidebar.medications'), path: '/', icon: <MdList className="text-xl" /> },
-    {
-      name: t('Sidebar.pending'),
-      path: '/pending',
-      icon: <MdPendingActions className="text-xl" />,
-      badge: pendingCount,
-    },
-    { name: t('Sidebar.settings'), path: '/settings', icon: <MdSettings className="text-xl" /> },
-  ];
+  const navItems = useNavItems();
 
   return (
-    <aside className="w-64 bg-[#FFFDF0] dark:bg-gray-800 h-screen flex flex-col border-r border-[#FDEB9B] dark:border-gray-700">
+    <aside className="hidden h-[100dvh] w-64 shrink-0 flex-col border-r border-[#FDEB9B] bg-[#FFFDF0] dark:border-gray-700 dark:bg-gray-800 md:flex">
       <div className="p-8 flex items-center gap-3">
         <div className="w-10 h-10 bg-[#FDEB9B] dark:bg-yellow-600 rounded-full flex items-center justify-center text-yellow-800 dark:text-yellow-100">
           <MdLocalPharmacy className="text-2xl" />

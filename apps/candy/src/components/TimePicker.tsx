@@ -90,27 +90,27 @@ export const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label }
   };
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative w-full sm:w-auto" ref={containerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`group flex items-center gap-4 px-6 py-4 bg-white dark:bg-gray-800 rounded-3xl border-2 transition-all duration-300 hover:shadow-lg active:scale-95 ${
+        className={`group flex w-full items-center justify-between gap-3 rounded-2xl border-2 bg-white px-4 py-3 transition-all duration-300 hover:shadow-lg active:scale-95 sm:w-auto sm:justify-start sm:gap-4 sm:rounded-3xl sm:px-6 sm:py-4 dark:bg-gray-800 ${
           isOpen 
             ? 'border-yellow-400 ring-4 ring-yellow-400/20 shadow-md' 
             : 'border-[#FDEB9B] dark:border-gray-600 hover:border-yellow-300'
         }`}
       >
-        <div className="flex flex-col items-start">
-          <span className="text-xs font-bold text-yellow-600 dark:text-yellow-50 uppercase tracking-wider mb-0.5">{label}</span>
-          <span className="text-2xl font-black text-yellow-950 dark:text-yellow-50 tabular-nums">
+        <div className="flex min-w-0 flex-col items-start text-left">
+          <span className="mb-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-50 sm:text-xs">{label}</span>
+          <span className="text-xl font-black tabular-nums text-yellow-950 dark:text-yellow-50 sm:text-2xl">
             {value}
           </span>
         </div>
-        <MdAccessTime className={`text-2xl transition-transform duration-300 ${isOpen ? 'text-yellow-500 rotate-12' : 'text-yellow-300'}`} />
+        <MdAccessTime className={`shrink-0 text-xl transition-transform duration-300 sm:text-2xl ${isOpen ? 'rotate-12 text-yellow-500' : 'text-yellow-300'}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-4 p-6 bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border-2 border-yellow-100 dark:border-gray-700 animate-in fade-in zoom-in duration-200 origin-top-left min-w-[240px]">
+        <div className="animate-in fade-in zoom-in absolute left-0 right-0 z-50 mt-3 max-w-[min(100%,calc(100vw-2rem))] origin-top rounded-2xl border-2 border-yellow-100 bg-white p-4 shadow-2xl duration-200 dark:border-gray-700 dark:bg-gray-800 sm:left-auto sm:right-0 sm:mt-4 sm:min-w-[240px] sm:max-w-none sm:rounded-[2.5rem] sm:p-6">
           <div className="flex items-center justify-center gap-4">
             {/* Hours */}
             <div className="flex flex-col items-center gap-1">

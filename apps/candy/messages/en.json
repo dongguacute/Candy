@@ -62,7 +62,11 @@
     "dangerDesc": "Clearing all data will delete all your medications and settings. This action cannot be undone.",
     "clearAll": "Clear All Data",
     "areYouSure": "Are you sure?",
-    "allCleared": "All data cleared!"
+    "allCleared": "All data cleared!",
+    "disclaimerTitle": "Disclaimer",
+    "disclaimerBody": "This app is for personal reminders and record-keeping only. It is not medical advice, diagnosis, or treatment. Always follow your healthcare provider’s instructions; seek professional care if you feel unwell. The developers disclaim liability for any direct or indirect consequences of using this app.",
+    "sourceOnGitHub": "Source on GitHub",
+    "linkOpensNewTab": "Opens in a new tab"
   },
   "Sidebar": {
     "medications": "Medications",

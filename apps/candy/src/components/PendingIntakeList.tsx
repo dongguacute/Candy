@@ -19,9 +19,9 @@ const PendingIntakeList: React.FC = () => {
 
   if (pendingVisible.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-amber-300/70 bg-[#FFFDF0]/80 py-20 text-center dark:border-amber-800/50 dark:bg-gray-900/40">
-        <MdPendingActions className="mb-4 text-6xl text-amber-300 dark:text-amber-800" />
-        <p className="text-lg font-semibold text-amber-900/70 dark:text-amber-200/80">
+      <div className="flex flex-col items-center justify-center rounded-[1.5rem] border-2 border-dashed border-amber-300/70 bg-[#FFFDF0]/80 px-4 py-14 text-center dark:border-amber-800/50 dark:bg-gray-900/40 sm:rounded-[2rem] sm:py-20">
+        <MdPendingActions className="mb-4 text-5xl text-amber-300 dark:text-amber-800 sm:text-6xl" />
+        <p className="text-base font-semibold text-amber-900/70 dark:text-amber-200/80 sm:text-lg">
           {t('Pending.empty')}
         </p>
       </div>
@@ -29,8 +29,8 @@ const PendingIntakeList: React.FC = () => {
   }
 
   return (
-    <section className="rounded-[2rem] border-2 border-amber-400/80 bg-[#FFF8E1] p-6 shadow-sm dark:border-amber-600/50 dark:bg-amber-950/40">
-      <p className="mb-6 text-sm font-medium text-amber-900/70 dark:text-amber-200/80">
+    <section className="rounded-[1.5rem] border-2 border-amber-400/80 bg-[#FFF8E1] p-4 shadow-sm dark:border-amber-600/50 dark:bg-amber-950/40 sm:rounded-[2rem] sm:p-6">
+      <p className="mb-4 text-sm font-medium text-amber-900/70 dark:text-amber-200/80 sm:mb-6">
         {t('Pending.hint')}
       </p>
       <ul className="space-y-3">
@@ -41,29 +41,31 @@ const PendingIntakeList: React.FC = () => {
           return (
             <li
               key={item.id}
-              className="flex items-center gap-4 rounded-2xl border border-amber-300/60 bg-white/90 px-4 py-3 dark:border-amber-800/50 dark:bg-gray-900/60"
+              className="flex flex-col gap-3 rounded-2xl border border-amber-300/60 bg-white/90 px-4 py-3 dark:border-amber-800/50 dark:bg-gray-900/60 sm:flex-row sm:items-center sm:gap-4"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-amber-200 bg-[#FFFDF0] dark:border-amber-800 dark:bg-gray-800">
-                {med.iconType === 'emoji' ? (
-                  <span className="text-2xl">{med.iconValue}</span>
-                ) : (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={med.iconValue} alt="" className="h-full w-full object-cover" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-bold text-amber-950 dark:text-amber-50">{med.name}</p>
-                <p className="text-sm text-amber-800/80 dark:text-amber-200/70">
-                  {t('Pending.slot')}: {slotLabel}
-                  {med.dosage
-                    ? ` · ${t(`Home.dosageOptions.${dosageKeyForI18n(med.dosage)}`)}`
-                    : ''}
-                </p>
+              <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-amber-200 bg-[#FFFDF0] dark:border-amber-800 dark:bg-gray-800">
+                  {med.iconType === 'emoji' ? (
+                    <span className="text-2xl">{med.iconValue}</span>
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={med.iconValue} alt="" className="h-full w-full object-cover" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1 sm:pr-2">
+                  <p className="break-words font-bold text-amber-950 dark:text-amber-50">{med.name}</p>
+                  <p className="text-sm text-amber-800/80 dark:text-amber-200/70">
+                    {t('Pending.slot')}: {slotLabel}
+                    {med.dosage
+                      ? ` · ${t(`Home.dosageOptions.${dosageKeyForI18n(med.dosage)}`)}`
+                      : ''}
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => markPendingIntakeDone(item.id)}
-                className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#FCD34D] px-4 py-2 text-sm font-bold text-amber-950 shadow-sm transition-transform hover:scale-105 hover:bg-amber-400 dark:bg-amber-500 dark:text-amber-950 dark:hover:bg-amber-400"
+                className="flex w-full shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#FCD34D] px-4 py-2.5 text-sm font-bold text-amber-950 shadow-sm transition-transform active:scale-[0.98] hover:bg-amber-400 dark:bg-amber-500 dark:text-amber-950 dark:hover:bg-amber-400 sm:w-auto sm:justify-start sm:py-2 sm:hover:scale-105"
                 aria-label={t('Pending.taken')}
               >
                 <MdCheckCircle className="text-lg" />
