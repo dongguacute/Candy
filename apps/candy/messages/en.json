@@ -68,7 +68,7 @@
     "sourceOnGitHub": "Source on GitHub",
     "linkOpensNewTab": "Opens in a new tab",
     "notificationsSection": "Notifications",
-    "notificationsHint": "On your phone, allow notifications first. Tap below to verify that system notifications work (same channel as dose reminders). If reminders stop after swiping the app away, disable battery restrictions for this app or allow alarms & reminders in system settings.",
+    "notificationsHint": "On your phone, allow notifications first. Tap below to verify that system notifications work (same channel as dose reminders). If reminders still fail after swiping the app away: enable “Alarms & reminders” / exact alarms for this app, set battery usage to unrestricted, and on Xiaomi / Redmi (HyperOS, MIUI) also allow autostart and background pop-ups if shown.",
     "testNotificationButton": "Send test notification",
     "testNotificationTitle": "Candy test",
     "testNotificationBody": "If you see this, reminders can be delivered.",

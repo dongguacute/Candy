@@ -97,6 +97,9 @@ jobs:
             echo "Skipping init: gen/android already present"
           fi
 
+      - name: Patch Android manifest (SCHEDULE_EXACT_ALARM, OEM 精确闹钟)
+        run: bash scripts/patch-android-manifest.sh
+
       - name: Regenerate app icons (src-tauri/icons, 含 android mipmap 源)
         working-directory: apps/candy
         run: pnpm exec tauri icon icon-manifest.json

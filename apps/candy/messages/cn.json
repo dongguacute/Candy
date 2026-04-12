@@ -68,7 +68,7 @@
     "sourceOnGitHub": "GitHub 开源仓库",
     "linkOpensNewTab": "在新标签页打开",
     "notificationsSection": "通知",
-    "notificationsHint": "在手机上请先允许通知权限。点下方按钮可验证是否能收到系统通知（与到达预设时间的提醒使用同一通道）。若划掉后台后收不到提醒，请在系统设置中关闭对本应用的「后台限制」或允许「闹钟与提醒」相关权限。",
+    "notificationsHint": "在手机上请先允许通知权限。点下方按钮可验证是否能收到系统通知（与到达预设时间的提醒使用同一通道）。若划掉后台后仍无提醒：请在系统设置中为本应用开启「闹钟和提醒 / 精确闹钟」权限，并将省电策略设为「无限制」；小米 / 红米（澎湃 HyperOS、MIUI）等还请在应用信息中允许「自启动」「后台弹出界面」。",
     "testNotificationButton": "发送测试通知",
     "testNotificationTitle": "Candy 测试通知",
     "testNotificationBody": "若能看到这条通知，说明用药提醒可以正常推送。",
