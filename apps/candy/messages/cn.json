@@ -66,7 +66,15 @@
     "disclaimerTitle": "免责声明",
     "disclaimerBody": "本应用仅供个人用药提醒与信息整理，不构成医疗建议、诊断或治疗意见。用药请严格遵医嘱；如有不适请及时就医。开发者不对因使用本应用而产生的任何直接或间接后果承担责任。",
     "sourceOnGitHub": "GitHub 开源仓库",
-    "linkOpensNewTab": "在新标签页打开"
+    "linkOpensNewTab": "在新标签页打开",
+    "notificationsSection": "通知",
+    "notificationsHint": "在手机上请先允许通知权限。点下方按钮可验证是否能收到系统通知（与到达预设时间的提醒使用同一通道）。",
+    "testNotificationButton": "发送测试通知",
+    "testNotificationTitle": "Candy 测试通知",
+    "testNotificationBody": "若能看到这条通知，说明用药提醒可以正常推送。",
+    "testNotificationDenied": "未授予通知权限，请在系统设置中允许本应用发送通知。",
+    "testNotificationFailed": "发送失败，请稍后重试。",
+    "testNotificationUnsupported": "当前环境不支持系统通知。"
   },
   "Sidebar": {
     "medications": "药物列表",

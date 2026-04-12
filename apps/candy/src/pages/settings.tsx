@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { MdSettings, MdDeleteForever, MdWarning, MdAccessTime, MdSave, MdCheckCircle, MdInfo, MdOpenInNew } from 'react-icons/md';
+import { MdSettings, MdDeleteForever, MdWarning, MdAccessTime, MdSave, MdCheckCircle, MdInfo, MdOpenInNew, MdNotificationsActive } from 'react-icons/md';
+import {
+  ensureMedicationNotificationChannel,
+  ensureNotificationPermission,
+  notifyNative,
+} from '../lib/tauriNotifications';
 import { TimePicker } from '../components/TimePicker';
 
 export default function Settings() {
@@ -24,6 +29,7 @@ export default function Settings() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedMessage, setShowSavedMessage] = useState(false);
+  const [testNotifyBusy, setTestNotifyBusy] = useState(false);
 
   // 临时状态，用于在点击保存前暂存修改
   const [tempTimes, setTempTimes] = useState({
@@ -71,6 +77,46 @@ export default function Settings() {
     clearAllData();
     setShowConfirm(false);
     alert(t('Settings.allCleared'));
+  };
+
+  const handleTestNotification = async () => {
+    setTestNotifyBusy(true);
+    try {
+      const { isTauri } = await import('@tauri-apps/api/core');
+      if (isTauri()) {
+        await ensureMedicationNotificationChannel();
+        const ok = await ensureNotificationPermission();
+        if (!ok) {
+          alert(t('Settings.testNotificationDenied'));
+          return;
+        }
+        await notifyNative({
+          title: t('Settings.testNotificationTitle'),
+          body: t('Settings.testNotificationBody'),
+        });
+        return;
+      }
+      if (typeof window === 'undefined' || !('Notification' in window)) {
+        alert(t('Settings.testNotificationUnsupported'));
+        return;
+      }
+      let perm = Notification.permission;
+      if (perm === 'default') {
+        perm = await Notification.requestPermission();
+      }
+      if (perm !== 'granted') {
+        alert(t('Settings.testNotificationDenied'));
+        return;
+      }
+      new Notification(t('Settings.testNotificationTitle'), {
+        body: t('Settings.testNotificationBody'),
+        icon: '/icons/icon-192x192.png',
+      });
+    } catch {
+      alert(t('Settings.testNotificationFailed'));
+    } finally {
+      setTestNotifyBusy(false);
+    }
   };
 
   return (
@@ -126,6 +172,29 @@ export default function Settings() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="mb-6 rounded-[1.5rem] border-2 border-[#FDEB9B] bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:mb-10 sm:rounded-[2.5rem] sm:p-10">
+        <h2 className="mb-4 flex flex-wrap items-center gap-2 text-xl font-bold text-yellow-900 dark:text-yellow-100 sm:mb-6 sm:gap-3 sm:text-2xl">
+          <MdNotificationsActive className="text-2xl sm:text-3xl" aria-hidden />
+          {t('Settings.notificationsSection')}
+        </h2>
+        <p className="mb-6 text-sm font-medium leading-relaxed text-yellow-800/85 dark:text-gray-300/90 sm:text-base">
+          {t('Settings.notificationsHint')}
+        </p>
+        <button
+          type="button"
+          onClick={() => void handleTestNotification()}
+          disabled={testNotifyBusy}
+          className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-[#FCD34D] bg-[#FFFDF0] px-6 py-4 text-base font-bold text-yellow-950 transition-all hover:bg-[#FEF5C8] active:scale-[0.98] disabled:opacity-60 dark:border-yellow-600 dark:bg-gray-700/80 dark:text-yellow-100 dark:hover:bg-gray-700 sm:w-auto sm:px-10"
+        >
+          {testNotifyBusy ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-yellow-950/30 border-t-yellow-950 dark:border-yellow-100/30 dark:border-t-yellow-100" />
+          ) : (
+            <MdNotificationsActive className="text-xl" aria-hidden />
+          )}
+          {t('Settings.testNotificationButton')}
+        </button>
       </div>
 
       <div className="mb-6 rounded-[1.5rem] border-2 border-[#FDEB9B] bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:mb-10 sm:rounded-[2.5rem] sm:p-10">

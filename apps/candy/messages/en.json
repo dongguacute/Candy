@@ -66,7 +66,15 @@
     "disclaimerTitle": "Disclaimer",
     "disclaimerBody": "This app is for personal reminders and record-keeping only. It is not medical advice, diagnosis, or treatment. Always follow your healthcare provider’s instructions; seek professional care if you feel unwell. The developers disclaim liability for any direct or indirect consequences of using this app.",
     "sourceOnGitHub": "Source on GitHub",
-    "linkOpensNewTab": "Opens in a new tab"
+    "linkOpensNewTab": "Opens in a new tab",
+    "notificationsSection": "Notifications",
+    "notificationsHint": "On your phone, allow notifications first. Tap below to verify that system notifications work (same channel as dose reminders).",
+    "testNotificationButton": "Send test notification",
+    "testNotificationTitle": "Candy test",
+    "testNotificationBody": "If you see this, reminders can be delivered.",
+    "testNotificationDenied": "Notification permission was not granted. Allow notifications for this app in system settings.",
+    "testNotificationFailed": "Could not send the test. Please try again.",
+    "testNotificationUnsupported": "Notifications are not supported in this environment."
   },
   "Sidebar": {
     "medications": "Medications",

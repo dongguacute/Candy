@@ -89,6 +89,10 @@ jobs:
       - name: Install JS dependencies (monorepo root)
         run: pnpm install --frozen-lockfile
 
+      - name: Regenerate app icons from public source (Android mipmap / bundle)
+        working-directory: apps/candy
+        run: pnpm exec tauri icon icon-manifest.json
+
       - name: Init Android project (skip if gen/android exists)
         run: |
           if [ ! -f apps/candy/src-tauri/gen/android/settings.gradle ]; then

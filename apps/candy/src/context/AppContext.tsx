@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useCallback, useEffect, useState, useRef } from 'react';
 import { dosageKeyForI18n } from '../dosageKey';
 import { copy } from '@candy/copy';
+import {
+  ensureMedicationNotificationChannel,
+  ensureNotificationPermission,
+  isNotificationPermissionGranted,
+  notifyNative,
+  TAURI_MEDICATION_CHANNEL_ID,
+} from '../lib/tauriNotifications';
 import cnMessages from '../../messages/cn.json';
 import enMessages from '../../messages/en.json';
 
@@ -19,9 +26,6 @@ export interface Medication {
 
 /** 当前时间 ≥ 预设时间即出现在待服用列表；超过此时长未勾选则自动清除（毫秒） */
 export const PENDING_INTAKE_TTL_MS = 6 * 60 * 60 * 1000;
-
-/** Android 通知渠道 id（与 tauri-plugin-notification 的 createChannel 一致） */
-const TAURI_MEDICATION_CHANNEL_ID = 'medication-reminders';
 
 export interface PendingIntakeItem {
   id: string;
@@ -256,25 +260,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     void (async () => {
       const { isTauri } = await import('@tauri-apps/api/core');
       if (!isTauri() || cancelled) return;
-      const n = await import('@tauri-apps/plugin-notification');
       try {
-        const existing = await n.channels();
-        if (!existing.some((c) => c.id === TAURI_MEDICATION_CHANNEL_ID)) {
-          await n.createChannel({
-            id: TAURI_MEDICATION_CHANNEL_ID,
-            name: 'Medication reminders',
-            description: 'Scheduled dose reminders',
-            importance: n.Importance.High,
-            visibility: n.Visibility.Private,
-            vibration: true,
-          });
-        }
+        await ensureMedicationNotificationChannel();
       } catch {
         // 渠道可能已存在或首次初始化失败，不影响后续 requestPermission
       }
-      if (!(await n.isPermissionGranted())) {
-        await n.requestPermission();
-      }
+      if (cancelled) return;
+      await ensureNotificationPermission();
     })();
     return () => {
       cancelled = true;
@@ -370,13 +362,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         const { isTauri } = await import('@tauri-apps/api/core');
         if (isTauri()) {
-          const n = await import('@tauri-apps/plugin-notification');
-          if (!(await n.isPermissionGranted())) continue;
-          n.sendNotification({
-            title: t('Notifications.timeToTake'),
-            body,
-            channelId: TAURI_MEDICATION_CHANNEL_ID,
-          });
+          if (!(await isNotificationPermissionGranted())) continue;
+          try {
+            await notifyNative({
+              title: t('Notifications.timeToTake'),
+              body,
+              channelId: TAURI_MEDICATION_CHANNEL_ID,
+            });
+          } catch {
+            // 忽略单次失败，避免打断定时器
+          }
           continue;
         }
 
