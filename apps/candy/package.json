@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@candy/copy": "workspace:*",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-notification": "~2",
     "gsap": "^3.14.2",
     "next": "16.2.3",
     "next-intl": "^4.9.1",

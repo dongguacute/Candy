@@ -20,6 +20,9 @@ export interface Medication {
 /** 当前时间 ≥ 预设时间即出现在待服用列表；超过此时长未勾选则自动清除（毫秒） */
 export const PENDING_INTAKE_TTL_MS = 6 * 60 * 60 * 1000;
 
+/** Android 通知渠道 id（与 tauri-plugin-notification 的 createChannel 一致） */
+const TAURI_MEDICATION_CHANNEL_ID = 'medication-reminders';
+
 export interface PendingIntakeItem {
   id: string;
   medicationId: string;
@@ -246,6 +249,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('bedtimeTime', bedtimeTime);
   }, [breakfastTime, lunchTime, dinnerTime, bedtimeTime, mounted]);
 
+  /** Tauri（含 Android）：创建通知渠道并请求 POST_NOTIFICATIONS 等权限（由 tauri-plugin-notification 处理） */
+  useEffect(() => {
+    if (!mounted) return;
+    let cancelled = false;
+    void (async () => {
+      const { isTauri } = await import('@tauri-apps/api/core');
+      if (!isTauri() || cancelled) return;
+      const n = await import('@tauri-apps/plugin-notification');
+      try {
+        const existing = await n.channels();
+        if (!existing.some((c) => c.id === TAURI_MEDICATION_CHANNEL_ID)) {
+          await n.createChannel({
+            id: TAURI_MEDICATION_CHANNEL_ID,
+            name: 'Medication reminders',
+            description: 'Scheduled dose reminders',
+            importance: n.Importance.High,
+            visibility: n.Visibility.Private,
+            vibration: true,
+          });
+        }
+      } catch {
+        // 渠道可能已存在或首次初始化失败，不影响后续 requestPermission
+      }
+      if (!(await n.isPermissionGranted())) {
+        await n.requestPermission();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted]);
+
   // 定时检查：当前时间 ≥ 预设时间即写入待服用（不依赖通知）；整点仅在已授权时发系统通知
   useEffect(() => {
     if (!mounted) return;
@@ -324,10 +359,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         lastNotifiedRef.current[key] = today;
 
-        const canNotify =
-          typeof Notification !== 'undefined' && Notification.permission === 'granted';
-        if (!canNotify) continue;
-
         const message = await copy(language);
         const medDetails = relevantMeds.map((m) => {
           const dosageText = m.dosage
@@ -335,9 +366,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             : '';
           return `${m.name}${dosageText}`;
         }).join(language === 'cn' ? '、' : ', ');
+        const body = `${message}\n${t('Notifications.take')}${medDetails}`;
+
+        const { isTauri } = await import('@tauri-apps/api/core');
+        if (isTauri()) {
+          const n = await import('@tauri-apps/plugin-notification');
+          if (!(await n.isPermissionGranted())) continue;
+          n.sendNotification({
+            title: t('Notifications.timeToTake'),
+            body,
+            channelId: TAURI_MEDICATION_CHANNEL_ID,
+          });
+          continue;
+        }
+
+        const canNotify =
+          typeof Notification !== 'undefined' && Notification.permission === 'granted';
+        if (!canNotify) continue;
 
         const options = {
-          body: `${message}\n${t('Notifications.take')}${medDetails}`,
+          body,
           icon: '/icons/icon-192x192.png',
           badge: '/icons/icon-192x192.png',
           vibrate: [200, 100, 200],
