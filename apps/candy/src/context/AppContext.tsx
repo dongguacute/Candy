@@ -415,11 +415,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (relevantMeds.length === 0) continue;
 
         const { isTauri } = await import('@tauri-apps/api/core');
-        if (isTauri() && isTauriMobileShell()) {
+        // 移动端曾完全依赖 AlarmManager；国产系统上闹钟可能不响，前台开着也无提示。
+        // 前台且页面可见时仍走 notifyNative，与系统闹钟并行；后台/划掉进程仍只靠已注册的定时通知。
+        if (
+          isTauri() &&
+          isTauriMobileShell() &&
+          typeof document !== 'undefined' &&
+          document.visibilityState !== 'visible'
+        ) {
           continue;
         }
-
-        lastNotifiedRef.current[key] = today;
 
         const message = await copy(language);
         const medDetails = relevantMeds.map((m) => {
@@ -437,6 +442,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               title: t('Notifications.timeToTake'),
               body,
             });
+            lastNotifiedRef.current[key] = today;
           } catch {
             // 忽略单次失败，避免打断定时器
           }
@@ -456,11 +462,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           renotify: true,
         };
 
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-          const registration = await navigator.serviceWorker.ready;
-          registration.showNotification(t('Notifications.timeToTake'), options);
-        } else {
-          new Notification(t('Notifications.timeToTake'), options);
+        try {
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            const registration = await navigator.serviceWorker.ready;
+            registration.showNotification(t('Notifications.timeToTake'), options);
+          } else {
+            new Notification(t('Notifications.timeToTake'), options);
+          }
+          lastNotifiedRef.current[key] = today;
+        } catch {
+          // 单次展示失败不标记已提醒，便于下一 tick 重试
         }
       }
     };
