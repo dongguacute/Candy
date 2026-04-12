@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import gsap from 'gsap';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { MdAccessTime, MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md';
 import { useAppContext } from '../context/AppContext';
 
@@ -12,6 +13,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label }
   const { t } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   // 内部临时状态，用于处理输入过程
   const [displayHours, setDisplayHours] = useState('');
@@ -33,6 +35,15 @@ export const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useLayoutEffect(() => {
+    if (!isOpen || !dropdownRef.current) return;
+    gsap.fromTo(
+      dropdownRef.current,
+      { opacity: 0, y: -10, scale: 0.97 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: 'power2.out' }
+    );
+  }, [isOpen]);
 
   const updateFinalTime = (h: string, m: string) => {
     const finalH = h.padStart(2, '0');
@@ -110,7 +121,10 @@ export const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label }
       </button>
 
       {isOpen && (
-        <div className="animate-in fade-in zoom-in absolute left-0 right-0 z-50 mt-3 max-w-[min(100%,calc(100vw-2rem))] origin-top rounded-2xl border-2 border-yellow-100 bg-white p-4 shadow-2xl duration-200 dark:border-gray-700 dark:bg-gray-800 sm:left-auto sm:right-0 sm:mt-4 sm:min-w-[240px] sm:max-w-none sm:rounded-[2.5rem] sm:p-6">
+        <div
+          ref={dropdownRef}
+          className="absolute left-0 right-0 z-50 mt-3 max-w-[min(100%,calc(100vw-2rem))] origin-top rounded-2xl border-2 border-yellow-100 bg-white p-4 shadow-2xl dark:border-gray-700 dark:bg-gray-800 sm:left-auto sm:right-0 sm:mt-4 sm:min-w-[240px] sm:max-w-none sm:rounded-[2.5rem] sm:p-6"
+        >
           <div className="flex items-center justify-center gap-4">
             {/* Hours */}
             <div className="flex flex-col items-center gap-1">

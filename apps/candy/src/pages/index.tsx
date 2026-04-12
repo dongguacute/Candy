@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { dosageKeyForI18n } from '../dosageKey';
 import { useAppContext, TimeToTake, Medication } from '../context/AppContext';
+import { GsapModal, type GsapModalHandle } from '../components/GsapModal';
 import { MdAdd, MdClose, MdImage, MdEmojiEmotions, MdMedication, MdWarning, MdEdit } from 'react-icons/md';
 
 type MedModal = null | { type: 'add' } | { type: 'edit'; id: string };
@@ -17,6 +18,8 @@ export default function Home() {
   const [iconValue, setIconValue] = useState('💊');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const medModalRef = useRef<GsapModalHandle>(null);
+  const deleteModalRef = useRef<GsapModalHandle>(null);
 
   const resetForm = () => {
     setName('');
@@ -111,7 +114,7 @@ export default function Home() {
         return;
       }
     }
-    setMedModal(null);
+    medModalRef.current?.close();
   };
 
   return (
@@ -130,15 +133,18 @@ export default function Home() {
       </div>
 
       {medModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-yellow-950/20 p-0 backdrop-blur-sm transition-opacity sm:items-center sm:p-4">
-          <div className="flex max-h-[min(92dvh,100%)] min-h-0 w-full max-w-md flex-col rounded-t-[2rem] border-4 border-[#FDEB9B] bg-[#FFFDF0] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl dark:border-gray-700 dark:bg-gray-800 sm:rounded-[2.5rem] sm:p-8 sm:pb-8">
+        <GsapModal
+          ref={medModalRef}
+          onCloseComplete={() => setMedModal(null)}
+          panelClassName="flex max-h-[min(92dvh,100%)] max-w-md flex-col rounded-t-[2rem] border-4 border-[#FDEB9B] bg-[#FFFDF0] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl dark:border-gray-700 dark:bg-gray-800 sm:rounded-[2.5rem] sm:p-8 sm:pb-8"
+        >
             <div className="mb-4 flex flex-shrink-0 items-start justify-between gap-4 sm:mb-6">
               <h2 className="pr-2 text-xl font-bold leading-tight text-yellow-900 dark:text-yellow-100 sm:text-2xl">
                 {medModal.type === 'edit' ? t('Home.editMedication') : t('Home.addMedication')}
               </h2>
               <button
                 type="button"
-                onClick={() => setMedModal(null)}
+                onClick={() => medModalRef.current?.close()}
                 className="shrink-0 p-2 bg-[#FEF5C8] hover:bg-[#FDEB9B] text-yellow-800 rounded-full transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
               >
                 <MdClose className="text-xl" />
@@ -260,7 +266,7 @@ export default function Home() {
               <div className="mt-2 flex flex-shrink-0 flex-col-reverse gap-3 border-t-2 border-[#FDEB9B]/60 pt-5 dark:border-gray-600 sm:flex-row sm:justify-end sm:gap-4 sm:pt-6">
                 <button
                   type="button"
-                  onClick={() => setMedModal(null)}
+                  onClick={() => medModalRef.current?.close()}
                   className="rounded-full px-6 py-3.5 font-bold text-yellow-700 transition-colors hover:bg-[#FEF5C8] dark:text-gray-300 dark:hover:bg-gray-700 sm:px-8 sm:py-4"
                 >
                   {t('Home.cancel')}
@@ -273,8 +279,7 @@ export default function Home() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </GsapModal>
       )}
 
       {medications.length === 0 ? (
@@ -350,8 +355,11 @@ export default function Home() {
 
       {/* Delete Confirmation Modal */}
       {medToDelete && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-yellow-950/20 p-0 backdrop-blur-sm transition-opacity sm:items-center sm:p-4">
-          <div className="w-full max-w-sm rounded-t-[2rem] border-4 border-[#FDEB9B] bg-[#FFFDF0] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center shadow-2xl dark:border-gray-700 dark:bg-gray-800 sm:rounded-[2.5rem] sm:p-8 sm:pb-8">
+        <GsapModal
+          ref={deleteModalRef}
+          onCloseComplete={() => setMedToDelete(null)}
+          panelClassName="max-w-sm rounded-t-[2rem] border-4 border-[#FDEB9B] bg-[#FFFDF0] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center shadow-2xl dark:border-gray-700 dark:bg-gray-800 sm:rounded-[2.5rem] sm:p-8 sm:pb-8"
+        >
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <MdWarning className="text-3xl" />
             </div>
@@ -363,23 +371,24 @@ export default function Home() {
             </p>
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-center sm:gap-4">
               <button
-                onClick={() => setMedToDelete(null)}
+                type="button"
+                onClick={() => deleteModalRef.current?.close()}
                 className="rounded-full px-6 py-3 font-bold text-yellow-700 transition-colors hover:bg-[#FEF5C8] dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 {t('Home.cancel')}
               </button>
               <button
+                type="button"
                 onClick={() => {
                   removeMedication(medToDelete);
-                  setMedToDelete(null);
+                  deleteModalRef.current?.close();
                 }}
                 className="rounded-full bg-red-500 px-6 py-3 font-bold text-white shadow-md transition-all hover:bg-red-600 active:scale-[0.98] sm:hover:scale-105"
               >
                 {t('Home.confirm')}
               </button>
             </div>
-          </div>
-        </div>
+        </GsapModal>
       )}
     </div>
   );
