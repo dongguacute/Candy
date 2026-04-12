@@ -1,0 +1,99 @@
+# Android APK/AAB. Local dev: install Android Studio, set ANDROID_HOME + NDK_HOME, then pnpm tauri:android:init.
+name: Tauri Android
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/candy/**"
+      - ".github/workflows/tauri-android.yml"
+
+env:
+  ANDROID_API: "34"
+  BUILD_TOOLS: "34.0.0"
+  NDK_VERSION: "26.1.10909125"
+
+jobs:
+  android:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK (cmdline-tools, platform-tools)
+        uses: android-actions/setup-android@v3
+
+      - name: Install platform, build-tools, NDK, CMake
+        run: |
+          sdkmanager --install \
+            "platforms;android-${{ env.ANDROID_API }}" \
+            "build-tools;${{ env.BUILD_TOOLS }}" \
+            "ndk;${{ env.NDK_VERSION }}" \
+            "cmake;3.22.1"
+
+      - name: Export ANDROID_HOME / NDK_HOME
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> "$GITHUB_ENV"
+
+      - name: Linux packages (Rust Android link / clang)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang pkg-config libssl-dev
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Rust stable + Android targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            apps/candy/src-tauri -> target
+
+      - name: Install JS dependencies (monorepo root)
+        run: pnpm install --frozen-lockfile
+
+      - name: Init Android project (skip if gen/android exists)
+        run: |
+          if [ ! -f apps/candy/src-tauri/gen/android/settings.gradle ]; then
+            pnpm --filter candy exec tauri android init --ci -v
+          else
+            echo "Skipping init: gen/android already present"
+          fi
+
+      - name: Build Android release (APK + AAB, aarch64 only for faster CI)
+        run: pnpm --filter candy exec tauri android build --ci -t aarch64 --apk --aab
+
+      - name: Upload APK / AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: candy-android
+          path: |
+            apps/candy/src-tauri/gen/android/app/build/outputs/**/*.apk
+            apps/candy/src-tauri/gen/android/app/build/outputs/**/*.aab
+          if-no-files-found: warn

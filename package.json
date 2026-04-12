@@ -5,7 +5,12 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "tauri:dev": "pnpm --filter candy exec tauri dev",
+    "tauri:build": "pnpm --filter candy exec tauri build",
+    "tauri:android:dev": "pnpm --filter candy exec tauri android dev",
+    "tauri:android:build": "pnpm --filter candy exec tauri android build",
+    "tauri:android:init": "pnpm --filter candy exec tauri android init"
   },
   "devDependencies": {
     "turbo": "^2.9.6"

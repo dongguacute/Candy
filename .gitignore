@@ -10,15 +10,21 @@ node_modules
 !.yarn/releases
 !.yarn/versions
 .pnpm-store
+
 # testing
 /coverage
+**/coverage
 
-# next.js
+# next.js / static export
 .next
 out
 
 # production
 build
+dist
+
+# rust / cargo (Tauri 等)
+**/target/
 
 # misc
 .DS_Store
@@ -32,6 +38,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,4 +46,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# turbo
 .turbo
+
+# eslint
+.eslintcache
+
+# IDE / editor
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
