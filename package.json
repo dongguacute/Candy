@@ -10,7 +10,8 @@
     "tauri:build": "pnpm --filter candy exec tauri build",
     "tauri:android:dev": "pnpm --filter candy exec tauri android dev",
     "tauri:android:build": "pnpm --filter candy exec tauri android build",
-    "tauri:android:init": "pnpm --filter candy exec tauri android init"
+    "tauri:android:init": "pnpm --filter candy exec tauri android init",
+    "android:gen-keystore": "bash scripts/android-gen-upload-keystore.sh"
   },
   "devDependencies": {
     "turbo": "^2.9.6"

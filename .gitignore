@@ -29,6 +29,8 @@ dist
 # misc
 .DS_Store
 *.pem
+*.jks
+upload-keystore.jks
 
 # debug
 npm-debug.log*
