@@ -1,13 +1,17 @@
-# Android APK/AAB. Local dev: install Android Studio, set ANDROID_HOME + NDK_HOME, then pnpm tauri:android:init.
-name: Tauri Android
+# 可复用：检出指定 tag → 按 tag 同步版本 → 构建 Android → 可选上传到 GitHub Release。
+name: Android build (reusable)
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "apps/candy/**"
-      - ".github/workflows/tauri-android.yml"
+  workflow_call:
+    inputs:
+      checkout_ref:
+        description: Git ref（一般为 release tag，如 v1.0.0）
+        type: string
+        required: true
+      upload_to_release:
+        description: 将 APK/AAB 上传到对应 tag 的 GitHub Release
+        type: boolean
+        default: true
 
 env:
   ANDROID_API: "34"
@@ -22,6 +26,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Sync version from tag
+        run: bash scripts/ci/sync-version-from-tag.sh "${{ inputs.checkout_ref }}"
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -52,22 +71,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang pkg-config libssl-dev
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
       - name: Rust stable + Android targets
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Sync Cargo.lock package version
+        run: (cd apps/candy/src-tauri && cargo update -p app)
 
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
@@ -86,14 +96,26 @@ jobs:
             echo "Skipping init: gen/android already present"
           fi
 
-      - name: Build Android release (APK + AAB, aarch64 only for faster CI)
+      - name: Build Android release (APK + AAB, aarch64)
         run: pnpm --filter candy exec tauri android build --ci -t aarch64 --apk --aab
 
-      - name: Upload APK / AAB
+      - name: Upload APK / AAB (artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: candy-android
+          name: candy-android-${{ inputs.checkout_ref }}
           path: |
             apps/candy/src-tauri/gen/android/app/build/outputs/**/*.apk
             apps/candy/src-tauri/gen/android/app/build/outputs/**/*.aab
           if-no-files-found: warn
+
+      - name: Upload to GitHub Release
+        if: ${{ inputs.upload_to_release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.checkout_ref }}
+          generate_release_notes: false
+          files: |
+            apps/candy/src-tauri/gen/android/app/build/outputs/**/*.apk
+            apps/candy/src-tauri/gen/android/app/build/outputs/**/*.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,84 @@
+# 在 GitHub 上「发布 Release」后触发：按 tag 写入版本号，再构建 Linux 桌面包与 Android，并把产物挂到该 Release。
+name: Release build
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  desktop-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Sync version from tag
+        run: bash scripts/ci/sync-version-from-tag.sh "${{ github.event.release.tag_name }}"
+
+      - name: Linux dependencies (Tauri / WebKitGTK)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Sync Cargo.lock package version
+        run: (cd apps/candy/src-tauri && cargo update -p app)
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            apps/candy/src-tauri -> target
+
+      - name: Install JS dependencies (monorepo root)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Tauri desktop (Next export + bundle)
+        run: pnpm --filter candy exec tauri build
+
+      - name: Upload desktop bundles to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          generate_release_notes: false
+          files: |
+            apps/candy/src-tauri/target/release/bundle/deb/*.deb
+            apps/candy/src-tauri/target/release/bundle/appimage/*.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  android:
+    uses: ./.github/workflows/android-build-reusable.yml
+    with:
+      checkout_ref: ${{ github.event.release.tag_name }}
+      upload_to_release: true
+    secrets: inherit
