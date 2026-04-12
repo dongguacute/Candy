@@ -89,10 +89,6 @@ jobs:
       - name: Install JS dependencies (monorepo root)
         run: pnpm install --frozen-lockfile
 
-      - name: Regenerate app icons from public source (Android mipmap / bundle)
-        working-directory: apps/candy
-        run: pnpm exec tauri icon icon-manifest.json
-
       - name: Init Android project (skip if gen/android exists)
         run: |
           if [ ! -f apps/candy/src-tauri/gen/android/settings.gradle ]; then
@@ -100,6 +96,13 @@ jobs:
           else
             echo "Skipping init: gen/android already present"
           fi
+
+      - name: Regenerate app icons (src-tauri/icons, 含 android mipmap 源)
+        working-directory: apps/candy
+        run: pnpm exec tauri icon icon-manifest.json
+
+      - name: Sync mipmap into gen/android (覆盖 init 时的默认图标)
+        run: bash scripts/sync-android-mipmap.sh
 
       - name: Build Android release (APK + AAB, aarch64)
         run: pnpm --filter candy exec tauri android build --ci -t aarch64 --apk --aab

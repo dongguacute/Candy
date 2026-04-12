@@ -2,11 +2,9 @@ import React, { createContext, useContext, useCallback, useEffect, useState, use
 import { dosageKeyForI18n } from '../dosageKey';
 import { copy } from '@candy/copy';
 import {
-  ensureMedicationNotificationChannel,
   ensureNotificationPermission,
   isNotificationPermissionGranted,
   notifyNative,
-  TAURI_MEDICATION_CHANNEL_ID,
 } from '../lib/tauriNotifications';
 import cnMessages from '../../messages/cn.json';
 import enMessages from '../../messages/en.json';
@@ -253,19 +251,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('bedtimeTime', bedtimeTime);
   }, [breakfastTime, lunchTime, dinnerTime, bedtimeTime, mounted]);
 
-  /** Tauri（含 Android）：创建通知渠道并请求 POST_NOTIFICATIONS 等权限（由 tauri-plugin-notification 处理） */
+  /** Tauri（含 Android）：请求 POST_NOTIFICATIONS 等（插件在原生侧已创建 default 通知渠道） */
   useEffect(() => {
     if (!mounted) return;
     let cancelled = false;
     void (async () => {
       const { isTauri } = await import('@tauri-apps/api/core');
       if (!isTauri() || cancelled) return;
-      try {
-        await ensureMedicationNotificationChannel();
-      } catch {
-        // 渠道可能已存在或首次初始化失败，不影响后续 requestPermission
-      }
-      if (cancelled) return;
       await ensureNotificationPermission();
     })();
     return () => {
@@ -367,7 +359,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             await notifyNative({
               title: t('Notifications.timeToTake'),
               body,
-              channelId: TAURI_MEDICATION_CHANNEL_ID,
             });
           } catch {
             // 忽略单次失败，避免打断定时器

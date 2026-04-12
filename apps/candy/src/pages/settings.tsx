@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { MdSettings, MdDeleteForever, MdWarning, MdAccessTime, MdSave, MdCheckCircle, MdInfo, MdOpenInNew, MdNotificationsActive } from 'react-icons/md';
-import {
-  ensureMedicationNotificationChannel,
-  ensureNotificationPermission,
-  notifyNative,
-} from '../lib/tauriNotifications';
+import { ensureNotificationPermission, notifyNative } from '../lib/tauriNotifications';
 import { TimePicker } from '../components/TimePicker';
 
 export default function Settings() {
@@ -84,7 +80,6 @@ export default function Settings() {
     try {
       const { isTauri } = await import('@tauri-apps/api/core');
       if (isTauri()) {
-        await ensureMedicationNotificationChannel();
         const ok = await ensureNotificationPermission();
         if (!ok) {
           alert(t('Settings.testNotificationDenied'));
@@ -112,8 +107,9 @@ export default function Settings() {
         body: t('Settings.testNotificationBody'),
         icon: '/icons/icon-192x192.png',
       });
-    } catch {
-      alert(t('Settings.testNotificationFailed'));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`${t('Settings.testNotificationFailed')}\n${msg}`);
     } finally {
       setTestNotifyBusy(false);
     }

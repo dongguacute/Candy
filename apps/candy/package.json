@@ -11,6 +11,7 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "tauri:icon": "tauri icon icon-manifest.json",
+    "tauri:android:sync-icons": "bash ../../scripts/sync-android-mipmap.sh",
     "tauri:android:dev": "tauri android dev",
     "tauri:android:build": "tauri android build",
     "tauri:android:init": "tauri android init"
