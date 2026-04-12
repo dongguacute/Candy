@@ -68,7 +68,7 @@
     "sourceOnGitHub": "GitHub 开源仓库",
     "linkOpensNewTab": "在新标签页打开",
     "notificationsSection": "通知",
-    "notificationsHint": "在手机上请先允许通知权限。点下方按钮可验证是否能收到系统通知（与到达预设时间的提醒使用同一通道）。",
+    "notificationsHint": "在手机上请先允许通知权限。点下方按钮可验证是否能收到系统通知（与到达预设时间的提醒使用同一通道）。若划掉后台后收不到提醒，请在系统设置中关闭对本应用的「后台限制」或允许「闹钟与提醒」相关权限。",
     "testNotificationButton": "发送测试通知",
     "testNotificationTitle": "Candy 测试通知",
     "testNotificationBody": "若能看到这条通知，说明用药提醒可以正常推送。",

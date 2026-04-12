@@ -2,9 +2,13 @@ import React, { createContext, useContext, useCallback, useEffect, useState, use
 import { dosageKeyForI18n } from '../dosageKey';
 import { copy } from '@candy/copy';
 import {
+  cancelNotificationIds,
   ensureNotificationPermission,
   isNotificationPermissionGranted,
+  isTauriMobileShell,
   notifyNative,
+  scheduleDailyAlarmNotification,
+  SLOT_NOTIFICATION_IDS,
 } from '../lib/tauriNotifications';
 import cnMessages from '../../messages/cn.json';
 import enMessages from '../../messages/en.json';
@@ -265,6 +269,75 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [mounted]);
 
+  /**
+   * Android / iOS：用系统 Alarm 注册「每天在 HH:mm」的本地通知，进程被杀仍可触发。
+   * 桌面 Tauri 仍依赖下方 setInterval + notifyNative。
+   */
+  useEffect(() => {
+    if (!mounted) return;
+    let cancelled = false;
+    void (async () => {
+      const { isTauri } = await import('@tauri-apps/api/core');
+      if (!isTauri() || !isTauriMobileShell() || cancelled) return;
+      if (!(await isNotificationPermissionGranted())) {
+        await cancelNotificationIds(Object.values(SLOT_NOTIFICATION_IDS));
+        return;
+      }
+      await cancelNotificationIds(Object.values(SLOT_NOTIFICATION_IDS));
+      if (cancelled) return;
+
+      const slots: TimeToTake[] = ['breakfast', 'lunch', 'dinner', 'bedtime'];
+      const times: Record<TimeToTake, string> = {
+        breakfast: breakfastTime,
+        lunch: lunchTime,
+        dinner: dinnerTime,
+        bedtime: bedtimeTime,
+      };
+
+      for (const slot of slots) {
+        if (cancelled) return;
+        const relevantMeds = medications.filter((m) => m.times.includes(slot));
+        if (relevantMeds.length === 0) continue;
+
+        const [h, min] = times[slot].split(':').map(Number);
+        const message = await copy(language);
+        const medDetails = relevantMeds
+          .map((m) => {
+            const dosageText = m.dosage
+              ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(m.dosage)}`)})`
+              : '';
+            return `${m.name}${dosageText}`;
+          })
+          .join(language === 'cn' ? '、' : ', ');
+        const body = `${message}\n${t('Notifications.take')}${medDetails}`;
+
+        try {
+          await scheduleDailyAlarmNotification({
+            id: SLOT_NOTIFICATION_IDS[slot],
+            title: t('Notifications.timeToTake'),
+            body,
+            hour: h,
+            minute: min,
+          });
+        } catch {
+          // 单次失败不阻断其它时段
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    mounted,
+    medications,
+    breakfastTime,
+    lunchTime,
+    dinnerTime,
+    bedtimeTime,
+    language,
+    t,
+  ]);
+
   // 定时检查：当前时间 ≥ 预设时间即写入待服用（不依赖通知）；整点仅在已授权时发系统通知
   useEffect(() => {
     if (!mounted) return;
@@ -341,6 +414,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
         if (relevantMeds.length === 0) continue;
 
+        const { isTauri } = await import('@tauri-apps/api/core');
+        if (isTauri() && isTauriMobileShell()) {
+          continue;
+        }
+
         lastNotifiedRef.current[key] = today;
 
         const message = await copy(language);
@@ -352,7 +430,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }).join(language === 'cn' ? '、' : ', ');
         const body = `${message}\n${t('Notifications.take')}${medDetails}`;
 
-        const { isTauri } = await import('@tauri-apps/api/core');
         if (isTauri()) {
           if (!(await isNotificationPermissionGranted())) continue;
           try {
