@@ -224,6 +224,7 @@ export default function HomeScreen() {
           keyExtractor={(m) => m.id}
           renderItem={renderMed}
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
         />
       )}
 
@@ -242,7 +243,7 @@ export default function HomeScreen() {
                 <MaterialIcons name="close" size={26} color={c.textMuted} />
               </TouchableOpacity>
             </View>
-            <ScrollView style={styles.modalScroll}>
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
               <Text style={[styles.label, { color: c.textMuted }]}>
                 {String(t("Home.medicationName"))}
               </Text>

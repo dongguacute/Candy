@@ -128,7 +128,11 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: c.bg }]} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: c.bg }]}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={[styles.sectionCard, { borderColor: c.border, backgroundColor: c.surface }]}>
         <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.appearance"))}</Text>
         <View style={styles.rowWrap}>

@@ -42,6 +42,7 @@ export default function PendingScreen() {
         data={pendingVisible}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           const med = medications.find((m) => m.id === item.medicationId);
           if (!med) return null;
