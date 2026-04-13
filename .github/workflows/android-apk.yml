@@ -30,6 +30,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Ensure native app dependencies are linked
+        run: pnpm --filter candy-native install --frozen-lockfile
+
+      - name: Verify Expo asset resolver dependency
+        run: pnpm --filter candy-native exec node -e "require.resolve('expo-asset/tools/hashAssetFiles')"
+
       - name: Sync version from tag
         run: bash scripts/ci/sync-version-from-tag.sh "${{ github.event.release.tag_name }}"
 
