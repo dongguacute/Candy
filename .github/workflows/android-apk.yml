@@ -34,7 +34,9 @@ jobs:
         run: pnpm --filter candy-native install --frozen-lockfile
 
       - name: Ensure expo-asset is present for Metro
-        run: pnpm --filter candy-native add expo-asset@~11.0.5 --no-save
+        run: |
+          pnpm --filter candy-native exec node -e "require.resolve('expo-asset/tools/hashAssetFiles')" \
+            || pnpm --filter candy-native add expo-asset@~11.0.5
 
       - name: Verify Expo asset resolver dependency
         run: pnpm --filter candy-native exec node -e "require.resolve('expo-asset/tools/hashAssetFiles')"
