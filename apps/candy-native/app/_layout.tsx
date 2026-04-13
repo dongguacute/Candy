@@ -1,6 +1,8 @@
 import "react-native-gesture-handler";
 import { Stack } from "expo-router";
-import { AppProvider } from "../src/context/AppContext";
+import { StatusBar } from "expo-status-bar";
+import { AppProvider, useAppContext } from "../src/context/AppContext";
+import { dark, light } from "../src/theme";
 
 function setupGlobalErrorNormalizer() {
   const maybeErrorUtils = (globalThis as unknown as {
@@ -34,10 +36,22 @@ function setupGlobalErrorNormalizer() {
 
 setupGlobalErrorNormalizer();
 
+function RootNavigator() {
+  const { resolvedTheme } = useAppContext();
+  const c = resolvedTheme === "dark" ? dark : light;
+
+  return (
+    <>
+      <StatusBar style={resolvedTheme === "dark" ? "light" : "dark"} backgroundColor={c.bg} />
+      <Stack screenOptions={{ headerShown: false }} />
+    </>
+  );
+}
+
 export default function RootLayout() {
   return (
     <AppProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <RootNavigator />
     </AppProvider>
   );
 }

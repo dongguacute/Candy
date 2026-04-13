@@ -1,16 +1,33 @@
 import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAppContext } from "../../src/context/AppContext";
+import { dark, light } from "../../src/theme";
 
 export default function TabLayout() {
-  const { t } = useAppContext();
+  const { t, resolvedTheme } = useAppContext();
+  const c = resolvedTheme === "dark" ? dark : light;
 
   return (
     <Tabs
       screenOptions={{
         headerTitleAlign: "center",
-        tabBarActiveTintColor: "#D97706",
-        tabBarInactiveTintColor: "#9CA3AF",
+        headerStyle: {
+          backgroundColor: c.surface,
+        },
+        headerTintColor: c.text,
+        headerTitleStyle: {
+          color: c.text,
+        },
+        headerShadowVisible: resolvedTheme !== "dark",
+        sceneStyle: {
+          backgroundColor: c.bg,
+        },
+        tabBarStyle: {
+          backgroundColor: c.surface,
+          borderTopColor: c.border,
+        },
+        tabBarActiveTintColor: c.accentDark,
+        tabBarInactiveTintColor: c.textMuted,
       }}
     >
       <Tabs.Screen
