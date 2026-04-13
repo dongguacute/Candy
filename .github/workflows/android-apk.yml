@@ -86,7 +86,21 @@ jobs:
 
       - name: Build release APK
         working-directory: apps/candy-native/android
-        run: ./gradlew assembleRelease
+        run: |
+          EXPO_USE_COMMUNITY_AUTOLINKING=1 ./gradlew :app:generateAutolinkingPackageList
+          node -e "
+            const fs = require('fs');
+            const file = 'apps/candy-native/android/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java';
+            if (!fs.existsSync(file)) process.exit(0);
+            const src = fs.readFileSync(file, 'utf8');
+            const next = src
+              .replace('import expo.core.ExpoModulesPackage;', 'import expo.modules.ExpoModulesPackage;');
+            if (src !== next) {
+              fs.writeFileSync(file, next);
+              console.log('Patched ExpoModulesPackage import fallback in PackageList.java');
+            }
+          "
+          EXPO_USE_COMMUNITY_AUTOLINKING=1 ./gradlew assembleRelease -x :app:generateAutolinkingPackageList
 
       - name: Rename APK
         run: |
