@@ -370,7 +370,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         for (const med of relevantMeds) {
           const message = med.reminderCopy?.trim() || String((await copy(language)) || "");
           const dosageText = med.dosage
-            ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(m.dosage)}`)})`
+            ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(med.dosage)}`)})`
             : "";
           const medDetails = `${String(med.name || "")}${dosageText}`;
           const body = `${message}\n${t("Notifications.take")}${medDetails}`;
