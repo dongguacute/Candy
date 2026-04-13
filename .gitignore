@@ -23,8 +23,11 @@ out
 build
 dist
 
-# rust / cargo (Tauri 等)
+# rust / cargo
 **/target/
+
+# Electron
+**/dist-electron/
 
 # misc
 .DS_Store
@@ -51,6 +54,11 @@ next-env.d.ts
 
 # turbo
 .turbo
+
+# Expo / React Native
+.expo/
+apps/candy-native/android/
+apps/candy-native/ios/
 
 # eslint
 .eslintcache

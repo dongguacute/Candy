@@ -2,7 +2,7 @@
 
 **[English](README.md)**
 
-本地用药提醒 Web 应用：按早餐 / 午餐 / 晚餐 / 睡前时段管理药品，到点出现「待服用」列表，并可在授权后通过系统通知提醒。数据保存在浏览器本地（`localStorage`），可安装为 PWA 离线使用。
+本地优先的 React Native 用药提醒应用：按早餐 / 午餐 / 晚餐 / 睡前时段管理药品，到点出现「待服用」列表，并可在授权后通过系统通知提醒。
 
 ## 功能概览
 
@@ -10,20 +10,20 @@
 - **服用时段**：每个药品可勾选多个时段（早餐、午餐、晚餐、睡前）；剂量支持 1/4～6 片等预设。
 - **图标**：支持 Emoji 或上传图片作为药品图标。
 - **待服用**：当前时间 ≥ 你在设置里配置的各餐/睡前时间后，对应药品会进入「待服用」列表；勾选「已服用」后当日不再重复出现。超过约 6 小时未处理的待服用条目会自动清理。
-- **系统通知**：在到达各时段的整点分钟时，若已授予通知权限，会通过 Service Worker 推送提醒；正文会附带 `@candy/copy` 包随机抽取的一句文案。
-- **设置**：浅色 / 深色 / 跟随系统；中文 / 英文（无本地偏好时按浏览器语言推断）；分别设定四个时段的具体时间；一键清除全部本地数据。
+- **系统通知**：在到达各时段的整点分钟时，若已授予通知权限，会触发本地推送提醒；正文会附带 `@candy/copy` 包随机抽取的一句文案。
+- **设置**：浅色 / 深色 / 跟随系统；中文 / 英文（无本地偏好时按设备语言推断）；分别设定四个时段的具体时间；一键清除全部本地数据。
 
 ## 技术栈
 
-- **应用**：Next.js（`pages` 路由）、React 19、Tailwind CSS 4、TypeScript。
-- **构建**：静态导出（`output: "export"`），生产环境集成 **PWA**（`next-pwa`）。
-- **仓库**：pnpm workspace + Turborepo；包管理器须使用 **pnpm**。
+- **应用**：Expo + React Native + TypeScript。
+- **仓库**：pnpm workspace；包管理器须使用 **pnpm**。
 
 ## 仓库结构
 
 | 路径 | 说明 |
 |------|------|
-| `apps/candy` | 主应用：页面、布局、上下文与本地持久化 |
+| `apps/candy-native` | 移动端应用（Expo / React Native） |
+| `packages/candy-shared` | 共享类型与 i18n 文案 |
 | `packages/copy` | 随机提醒文案（中/英 JSON），供通知正文使用 |
 
 ## 开发与构建
@@ -34,11 +34,10 @@
 pnpm install
 ```
 
-- 开发：`pnpm dev`（在 `apps/candy` 中运行 Next 开发服务器；根目录通过 Turbo 聚合任务）。
-- 构建：`pnpm build`
-- 检查：`pnpm lint`
-
-PWA 在开发模式下通常关闭，生产构建后可在静态站点上验证安装与离线行为。
+- 启动 Metro：`pnpm native:start`
+- 运行 iOS：`pnpm native:ios`
+- 运行 Android：`pnpm native:android`
+- 类型检查：`pnpm native:typecheck`
 
 ---
 
