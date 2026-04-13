@@ -38,8 +38,16 @@ jobs:
           pnpm --filter candy-native exec node -e "require.resolve('expo-asset/tools/hashAssetFiles')" \
             || pnpm --filter candy-native add expo-asset@~11.0.5
 
+      - name: Ensure babel-preset-expo is present for Metro
+        run: |
+          pnpm --filter candy-native exec node -e "require.resolve('babel-preset-expo')" \
+            || pnpm --filter candy-native add -D babel-preset-expo@~12.0.12
+
       - name: Verify Expo asset resolver dependency
         run: pnpm --filter candy-native exec node -e "require.resolve('expo-asset/tools/hashAssetFiles')"
+
+      - name: Verify Babel preset dependency
+        run: pnpm --filter candy-native exec node -e "require.resolve('babel-preset-expo')"
 
       - name: Sync version from tag
         run: bash scripts/ci/sync-version-from-tag.sh "${{ github.event.release.tag_name }}"
