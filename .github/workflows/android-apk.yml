@@ -1,0 +1,82 @@
+name: Android APK
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-android-apk:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync version from tag
+        run: bash scripts/ci/sync-version-from-tag.sh "${{ github.event.release.tag_name }}"
+
+      - id: app_version
+        name: Read app version
+        run: echo "value=$(node -p 'require(\"./apps/candy-native/package.json\").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Android project
+        run: pnpm --filter candy-native exec expo prebuild --platform android --non-interactive --no-install
+
+      - name: Write Android signing files
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ]; then
+            echo "Missing ANDROID_KEYSTORE_BASE64 or ANDROID_KEYSTORE_PASSWORD"
+            exit 1
+          fi
+
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "apps/candy-native/android/app/upload-keystore.jks"
+
+          KEY_ALIAS="$(keytool -list -keystore "apps/candy-native/android/app/upload-keystore.jks" -storepass "$ANDROID_KEYSTORE_PASSWORD" | awk -F, '/,/{print $1; exit}')"
+          if [ -z "$KEY_ALIAS" ]; then
+            echo "Failed to detect key alias from keystore"
+            exit 1
+          fi
+
+          {
+            echo "MYAPP_UPLOAD_STORE_FILE=upload-keystore.jks"
+            echo "MYAPP_UPLOAD_KEY_ALIAS=$KEY_ALIAS"
+            echo "MYAPP_UPLOAD_STORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "MYAPP_UPLOAD_KEY_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+          } >> "apps/candy-native/android/gradle.properties"
+
+      - name: Build release APK
+        working-directory: apps/candy-native/android
+        run: ./gradlew assembleRelease
+
+      - name: Rename APK
+        run: |
+          cp \
+            "apps/candy-native/android/app/build/outputs/apk/release/app-release.apk" \
+            "apps/candy-native/android/app/build/outputs/apk/release/candy+${{ steps.app_version.outputs.value }}.apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: candy+${{ steps.app_version.outputs.value }}.apk
+          path: apps/candy-native/android/app/build/outputs/apk/release/candy+${{ steps.app_version.outputs.value }}.apk
