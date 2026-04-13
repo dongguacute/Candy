@@ -59,6 +59,31 @@ jobs:
       - name: Generate Android project
         run: CI=1 pnpm --filter candy-native exec expo prebuild --platform android --no-install
 
+      - name: Patch Gradle repository fallbacks
+        run: |
+          node -e "
+            const fs = require('fs');
+            const file = 'apps/candy-native/android/settings.gradle';
+            let src = fs.readFileSync(file, 'utf8');
+            if (!src.includes('maven.aliyun.com')) {
+              src = src.replace(
+                'pluginManagement {',
+                [
+                  'pluginManagement {',
+                  '    repositories {',
+                  '        gradlePluginPortal()',
+                  '        google()',
+                  '        maven { url \"https://maven.aliyun.com/repository/google\" }',
+                  '        maven { url \"https://maven.aliyun.com/repository/public\" }',
+                  '        mavenCentral()',
+                  '    }'
+                ].join('\n')
+              );
+              fs.writeFileSync(file, src);
+              console.log('Patched Gradle plugin repositories with mirror fallbacks');
+            }
+          "
+
       - name: Write Android signing files
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
