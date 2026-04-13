@@ -19,6 +19,9 @@
     "errorDuplicate": "已存在信息完全相同的药物，请勿重复添加。",
     "errorTime": "请选择服用时间",
     "errorDosage": "请选择剂量",
+    "reminderCopyLabel": "提醒文案（可选）",
+    "reminderCopyPlaceholder": "例如：记得按时吃药，今天也要照顾好自己",
+    "reminderCopyHint": "留空时将使用默认随机文案（最多 80 字）。",
     "dosage": "剂量",
     "dosageOptions": {
       "quarter": "1/4 颗",

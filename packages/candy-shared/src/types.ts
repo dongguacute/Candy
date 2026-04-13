@@ -9,6 +9,7 @@ export interface Medication {
   iconType: "emoji" | "image";
   iconValue: string;
   dosage?: string;
+  reminderCopy?: string;
 }
 
 /** 当前时间 ≥ 预设时间即出现在待服用列表；超过此时长未勾选则自动清除（毫秒） */

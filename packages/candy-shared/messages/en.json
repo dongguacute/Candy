@@ -19,6 +19,9 @@
     "errorDuplicate": "A medication with identical details already exists.",
     "errorTime": "Please select time to take",
     "errorDosage": "Please select dosage",
+    "reminderCopyLabel": "Reminder text (optional)",
+    "reminderCopyPlaceholder": "e.g. Time to take your meds and take care of yourself",
+    "reminderCopyHint": "Leave empty to use default random copy (max 80 chars).",
     "dosage": "Dosage",
     "dosageOptions": {
       "quarter": "1/4 Pill",

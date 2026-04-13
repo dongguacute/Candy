@@ -39,6 +39,7 @@ export default function HomeScreen() {
   const [dosage, setDosage] = useState("1");
   const [iconType, setIconType] = useState<"emoji" | "image">("emoji");
   const [iconValue, setIconValue] = useState("💊");
+  const [reminderCopy, setReminderCopy] = useState("");
 
   const resetForm = () => {
     setName("");
@@ -46,6 +47,7 @@ export default function HomeScreen() {
     setDosage("1");
     setIconType("emoji");
     setIconValue("💊");
+    setReminderCopy("");
   };
 
   const fillFormFromMedication = (med: Medication) => {
@@ -54,6 +56,7 @@ export default function HomeScreen() {
     setDosage(med.dosage ?? "1");
     setIconType(med.iconType);
     setIconValue(med.iconValue);
+    setReminderCopy(med.reminderCopy ?? "");
   };
 
   const timeOptions: { value: TimeToTake; label: string }[] = [
@@ -113,6 +116,7 @@ export default function HomeScreen() {
       dosage,
       iconType,
       iconValue,
+      reminderCopy: reminderCopy.trim() || undefined,
     };
     if (medModal?.type === "edit") {
       if (!updateMedication(medModal.id, payload)) {
@@ -331,6 +335,22 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+
+              <Text style={[styles.label, { color: c.textMuted }]}>
+                {String(t("Home.reminderCopyLabel"))}
+              </Text>
+              <TextInput
+                value={reminderCopy}
+                onChangeText={setReminderCopy}
+                placeholder={String(t("Home.reminderCopyPlaceholder"))}
+                placeholderTextColor={c.textMuted}
+                style={[styles.copyInput, { color: c.text, borderColor: c.border }]}
+                multiline
+                maxLength={80}
+              />
+              <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 6 }}>
+                {String(t("Home.reminderCopyHint"))}
+              </Text>
             </ScrollView>
             <View style={styles.modalFooter}>
               <TouchableOpacity onPress={() => setMedModal(null)}>
@@ -501,6 +521,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
+  },
+  copyInput: {
+    borderWidth: 2,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    minHeight: 84,
+    textAlignVertical: "top",
   },
   rowWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {

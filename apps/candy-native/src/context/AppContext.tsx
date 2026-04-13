@@ -37,13 +37,6 @@ Notifications.setNotificationHandler({
 
 const messagesMap = { cn: cnMessages, en: enMessages };
 
-const SLOT_IDS: Record<TimeToTake, string> = {
-  breakfast: "candy-slot-breakfast",
-  lunch: "candy-slot-lunch",
-  dinner: "candy-slot-dinner",
-  bedtime: "candy-slot-bedtime",
-};
-
 const TIME_SLOTS: TimeToTake[] = ["breakfast", "lunch", "dinner", "bedtime"];
 
 /** 防止 AsyncStorage 中旧/损坏数据导致字段非字符串，进而在 <Text> 等处渲染崩溃 */
@@ -76,7 +69,13 @@ function normalizeMedication(raw: unknown): Medication | null {
   else if (typeof o.dosage === "string") dosage = o.dosage;
   else dosage = String(o.dosage);
 
-  return { id, name, times, iconType, iconValue, dosage };
+  let reminderCopy: string | undefined;
+  if (typeof o.reminderCopy === "string") {
+    const trimmed = o.reminderCopy.trim();
+    reminderCopy = trimmed || undefined;
+  }
+
+  return { id, name, times, iconType, iconValue, dosage, reminderCopy };
 }
 
 function normalizeMedications(raw: unknown): Medication[] {
@@ -96,6 +95,7 @@ function medicationDataEqual(
   if (a.name.trim() !== b.name.trim()) return false;
   if (a.iconType !== b.iconType || a.iconValue !== b.iconValue) return false;
   if ((a.dosage ?? "1") !== (b.dosage ?? "1")) return false;
+  if ((a.reminderCopy ?? "").trim() !== (b.reminderCopy ?? "").trim()) return false;
   const ta = [...a.times].sort().join("\0");
   const tb = [...b.times].sort().join("\0");
   return ta === tb;
@@ -108,6 +108,7 @@ function toMedicationData(m: Medication): Omit<Medication, "id"> {
     dosage: m.dosage,
     iconType: m.iconType,
     iconValue: m.iconValue,
+    reminderCopy: m.reminderCopy,
   };
 }
 
@@ -366,32 +367,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         if (relevantMeds.length === 0) continue;
 
         const [h, min] = times[slot].split(":").map(Number);
-        const message = String(await copy(language) || "");
-        const medDetails = relevantMeds
-          .map((m) => {
-            const dosageText = m.dosage
-              ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(m.dosage)}`)})`
-              : "";
-            return `${String(m.name || "")}${dosageText}`;
-          })
-          .join(language === "cn" ? "、" : ", ");
-        const body = `${message}\n${t("Notifications.take")}${medDetails}`;
+        for (const med of relevantMeds) {
+          const message = med.reminderCopy?.trim() || String((await copy(language)) || "");
+          const dosageText = med.dosage
+            ? ` (${t(`Home.dosageOptions.${dosageKeyForI18n(m.dosage)}`)})`
+            : "";
+          const medDetails = `${String(med.name || "")}${dosageText}`;
+          const body = `${message}\n${t("Notifications.take")}${medDetails}`;
 
-        try {
-          await Notifications.scheduleNotificationAsync({
-            identifier: SLOT_IDS[slot],
-            content: {
-              title: t("Notifications.timeToTake"),
-              body,
-            },
-            trigger: {
-              type: Notifications.SchedulableTriggerInputTypes.DAILY,
-              hour: h,
-              minute: min,
-            },
-          });
-        } catch {
-          /* 单次失败不阻断 */
+          try {
+            await Notifications.scheduleNotificationAsync({
+              identifier: `candy-slot-${slot}-${med.id}`,
+              content: {
+                title: t("Notifications.timeToTake"),
+                body,
+              },
+              trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DAILY,
+                hour: h,
+                minute: min,
+              },
+            });
+          } catch {
+            /* 单次失败不阻断 */
+          }
         }
       }
     })();
