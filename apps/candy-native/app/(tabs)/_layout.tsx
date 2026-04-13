@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { Platform, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAppContext } from "../../src/context/AppContext";
 import { dark, light } from "../../src/theme";
@@ -6,26 +7,45 @@ import { dark, light } from "../../src/theme";
 export default function TabLayout() {
   const { t, resolvedTheme } = useAppContext();
   const c = resolvedTheme === "dark" ? dark : light;
+  const androidTopBg = c.surface;
+  const androidTopBorderWidth = Platform.OS === "android" ? 0 : StyleSheet.hairlineWidth;
+  const tabBarHeight = Platform.OS === "android" ? 58 : 62;
+  const tabBarPaddingTop = Platform.OS === "android" ? 4 : 6;
+  const tabBarPaddingBottom = Platform.OS === "android" ? 4 : 8;
 
   return (
     <Tabs
       screenOptions={{
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: c.surface,
+          backgroundColor: androidTopBg,
+          borderBottomColor: c.border,
+          borderBottomWidth: androidTopBorderWidth,
+          elevation: 0,
+          shadowOpacity: 0,
         },
         headerTintColor: c.text,
         headerTitleStyle: {
           color: c.text,
+          fontWeight: "700",
         },
-        headerShadowVisible: resolvedTheme !== "dark",
+        headerShadowVisible: false,
         sceneStyle: {
           backgroundColor: c.bg,
         },
         tabBarStyle: {
-          backgroundColor: c.surface,
+          backgroundColor: androidTopBg,
           borderTopColor: c.border,
+          borderTopWidth: androidTopBorderWidth,
+          elevation: 0,
+          shadowOpacity: 0,
+          height: tabBarHeight,
+          paddingTop: tabBarPaddingTop,
+          paddingBottom: tabBarPaddingBottom,
         },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: "600" },
+        tabBarItemStyle: { borderRadius: 12 },
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: c.accentDark,
         tabBarInactiveTintColor: c.textMuted,
       }}

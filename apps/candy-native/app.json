@@ -19,6 +19,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FCD34D"
       },
+      "navigationBar": {
+        "backgroundColor": "#FFFDF0",
+        "barStyle": "dark-content"
+      },
       "package": "com.dongguacute.candy"
     },
     "plugins": [

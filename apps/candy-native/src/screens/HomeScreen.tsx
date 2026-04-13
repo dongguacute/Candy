@@ -169,6 +169,7 @@ export default function HomeScreen() {
           setMedModal({ type: "edit", id: med.id });
         }}
         style={styles.iconBtn}
+        activeOpacity={0.75}
       >
         <MaterialIcons name="edit" size={22} color={c.accentDark} />
       </TouchableOpacity>
@@ -184,6 +185,7 @@ export default function HomeScreen() {
                 : "rgba(220,38,38,0.1)",
           },
         ]}
+        activeOpacity={0.75}
       >
         <MaterialIcons name="close" size={22} color={c.danger} />
       </TouchableOpacity>
@@ -196,6 +198,7 @@ export default function HomeScreen() {
         <Text style={[styles.title, { color: c.text }]}>{String(t("Home.title"))}</Text>
         <TouchableOpacity
           style={[styles.addBtn, { backgroundColor: c.accent }]}
+          activeOpacity={0.82}
           onPress={() => {
             resetForm();
             setMedModal({ type: "add" });
@@ -263,6 +266,7 @@ export default function HomeScreen() {
                   <TouchableOpacity
                     key={option.value}
                     onPress={() => handleTimeToggle(option.value)}
+                    activeOpacity={0.82}
                     style={[
                       styles.chip,
                       {
@@ -288,6 +292,7 @@ export default function HomeScreen() {
                   <TouchableOpacity
                     key={option.value}
                     onPress={() => setDosage(option.value)}
+                    activeOpacity={0.82}
                     style={[
                       styles.chip,
                       {
@@ -328,6 +333,7 @@ export default function HomeScreen() {
                   <TouchableOpacity
                     style={[styles.pickImgBtn, { backgroundColor: c.bg }]}
                     onPress={pickImage}
+                    activeOpacity={0.82}
                   >
                     <MaterialIcons name="image" size={20} color={c.text} />
                     <Text style={{ color: c.text, marginLeft: 8 }}>
@@ -362,6 +368,7 @@ export default function HomeScreen() {
               <TouchableOpacity
                 style={[styles.saveBtn, { backgroundColor: c.accent }]}
                 onPress={handleSubmit}
+                activeOpacity={0.82}
               >
                 <Text style={{ color: c.text, fontWeight: "800" }}>
                   {String(t("Home.save"))}
@@ -406,6 +413,7 @@ export default function HomeScreen() {
               <TouchableOpacity
                 style={[styles.cancelDeleteBtn, { borderColor: c.border, backgroundColor: c.bg }]}
                 onPress={() => setMedToDelete(null)}
+                activeOpacity={0.82}
               >
                 <Text style={{ color: c.textMuted, fontWeight: "800" }}>
                   {String(t("Home.cancel"))}
@@ -417,6 +425,7 @@ export default function HomeScreen() {
                   if (medToDelete) removeMedication(medToDelete);
                   setMedToDelete(null);
                 }}
+                activeOpacity={0.82}
               >
                 <Text style={{ color: "#fff", fontWeight: "900" }}>
                   {String(t("Home.confirm"))}
@@ -431,53 +440,53 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  headerRow: { marginBottom: 16, gap: 12 },
-  title: { fontSize: 24, fontWeight: "900" },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 12 },
+  headerRow: { marginBottom: 14, gap: 10 },
+  title: { fontSize: 30, fontWeight: "800", letterSpacing: 0.2 },
   addBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 12,
+    paddingVertical: 11,
     paddingHorizontal: 16,
-    borderRadius: 999,
+    borderRadius: 14,
   },
   addBtnText: { fontWeight: "800" },
-  list: { paddingBottom: 24, gap: 12 },
+  list: { paddingBottom: 28, gap: 10 },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
-    borderRadius: 16,
-    borderWidth: 2,
-    gap: 8,
-    marginBottom: 8,
+    padding: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 10,
+    marginBottom: 6,
   },
   cardBody: { flex: 1, minWidth: 0 },
-  medName: { fontSize: 18, fontWeight: "800" },
+  medName: { fontSize: 17, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 },
   tag: {
     borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    borderRadius: 12,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
   },
-  tagText: { fontSize: 12, fontWeight: "700" },
+  tagText: { fontSize: 12, fontWeight: "600" },
   dosageBadge: {
     borderWidth: 1,
-    borderRadius: 999,
+    borderRadius: 10,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
   },
-  dosageText: { fontSize: 12, fontWeight: "700" },
+  dosageText: { fontSize: 12, fontWeight: "600" },
   iconBtn: { padding: 6 },
-  deleteIconBtn: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 6 },
+  deleteIconBtn: { borderRadius: 10, paddingHorizontal: 8, paddingVertical: 6 },
   iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",

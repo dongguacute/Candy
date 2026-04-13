@@ -3,7 +3,6 @@ import {
   Alert,
   Linking,
   Modal,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -85,13 +84,8 @@ export default function SettingsScreen() {
     setTimeout(() => setShowSaved(false), 2500);
   };
 
-  const onTimeChange = (key: keyof typeof tempTimes) => (event: DateTimePickerEvent, d?: Date) => {
+  const onTimeChange = (_key: keyof typeof tempTimes) => (event: DateTimePickerEvent, d?: Date) => {
     if (event.type === "dismissed" || !d) {
-      setPicker(null);
-      return;
-    }
-    if (Platform.OS === "android") {
-      setTempTimes((prev) => ({ ...prev, [key]: hhmmFromDate(d) }));
       setPicker(null);
       return;
     }
@@ -103,7 +97,7 @@ export default function SettingsScreen() {
     setPicker(key);
   };
 
-  const confirmIOSPicker = () => {
+  const confirmPicker = () => {
     if (!picker) return;
     setTempTimes((prev) => ({ ...prev, [picker]: hhmmFromDate(pickerDate) }));
     setPicker(null);
@@ -228,16 +222,7 @@ export default function SettingsScreen() {
         ))}
       </View>
 
-      {picker && Platform.OS === "android" && (
-        <DateTimePicker
-          value={dateFromHHMM(tempTimes[picker])}
-          mode="time"
-          display="default"
-          onChange={onTimeChange(picker)}
-        />
-      )}
-
-      {picker && Platform.OS === "ios" && (
+      {picker && (
         <Modal transparent animationType="fade" visible onRequestClose={() => setPicker(null)}>
           <View style={styles.pickerBackdrop}>
             <View style={[styles.pickerCard, { backgroundColor: c.surface, borderColor: c.border }]}>
@@ -249,7 +234,7 @@ export default function SettingsScreen() {
                   <TouchableOpacity onPress={() => setPicker(null)}>
                     <Text style={{ color: c.textMuted, fontWeight: "700" }}>{String(t("Home.cancel"))}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={confirmIOSPicker}>
+                  <TouchableOpacity onPress={confirmPicker}>
                     <Text style={{ color: c.accentDark, fontWeight: "900" }}>{String(t("Home.save"))}</Text>
                   </TouchableOpacity>
                 </View>

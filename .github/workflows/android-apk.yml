@@ -61,6 +61,27 @@ jobs:
       - name: Generate Android project
         run: CI=1 pnpm --filter candy-native exec expo prebuild --platform android --no-install
 
+      - name: Optimize Android release size config
+        run: |
+          node -e "
+            const fs = require('fs');
+            const file = 'apps/candy-native/android/gradle.properties';
+            let src = fs.readFileSync(file, 'utf8');
+            const upsert = (key, value) => {
+              const re = new RegExp('^' + key.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + '=.*$', 'm');
+              if (re.test(src)) {
+                src = src.replace(re, key + '=' + value);
+              } else {
+                src += '\\n' + key + '=' + value + '\\n';
+              }
+            };
+            upsert('reactNativeArchitectures', 'armeabi-v7a,arm64-v8a');
+            upsert('android.enableProguardInReleaseBuilds', 'true');
+            upsert('android.enableShrinkResourcesInReleaseBuilds', 'true');
+            fs.writeFileSync(file, src);
+            console.log('Applied Android release size optimizations in gradle.properties');
+          "
+
       - name: Patch Gradle repository fallbacks
         run: |
           node -e "

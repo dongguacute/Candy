@@ -64,6 +64,7 @@ export default function PendingScreen() {
               <TouchableOpacity
                 style={[styles.doneBtn, { backgroundColor: c.accent }]}
                 onPress={() => markPendingIntakeDone(item.id)}
+                activeOpacity={0.82}
               >
                 <MaterialIcons name="check-circle" size={22} color={c.text} />
                 <Text style={[styles.doneText, { color: c.text }]}>
@@ -79,28 +80,28 @@ export default function PendingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 12 },
   center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
   emptyTitle: { fontSize: 20, fontWeight: "800", marginTop: 16, marginBottom: 8 },
-  hint: { marginBottom: 12, fontSize: 14 },
-  list: { paddingBottom: 24, gap: 10 },
+  hint: { marginBottom: 10, fontSize: 14 },
+  list: { paddingBottom: 28, gap: 10 },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 2,
-    borderRadius: 16,
-    padding: 12,
-    gap: 12,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+    gap: 10,
   },
   cardMain: { flex: 1 },
-  medName: { fontSize: 18, fontWeight: "800" },
+  medName: { fontSize: 17, fontWeight: "700" },
   doneBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 999,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    borderRadius: 12,
   },
-  doneText: { fontWeight: "800" },
+  doneText: { fontWeight: "700" },
 });

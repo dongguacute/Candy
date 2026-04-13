@@ -39,10 +39,15 @@ setupGlobalErrorNormalizer();
 function RootNavigator() {
   const { resolvedTheme } = useAppContext();
   const c = resolvedTheme === "dark" ? dark : light;
+  const androidStatusBg = c.surface;
 
   return (
     <>
-      <StatusBar style={resolvedTheme === "dark" ? "light" : "dark"} backgroundColor={c.bg} />
+      <StatusBar
+        style={resolvedTheme === "dark" ? "light" : "dark"}
+        backgroundColor={androidStatusBg}
+        translucent={false}
+      />
       <Stack screenOptions={{ headerShown: false }} />
     </>
   );
