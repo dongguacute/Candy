@@ -57,7 +57,7 @@ jobs:
         run: echo "value=$(node -p 'require(\"./apps/candy-native/package.json\").version')" >> "$GITHUB_OUTPUT"
 
       - name: Generate Android project
-        run: pnpm --filter candy-native exec expo prebuild --platform android --non-interactive --no-install
+        run: CI=1 pnpm --filter candy-native exec expo prebuild --platform android --no-install
 
       - name: Write Android signing files
         env:
