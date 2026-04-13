@@ -7,6 +7,8 @@ on:
 jobs:
   build-android-apk:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -142,3 +144,8 @@ jobs:
         with:
           name: candy+${{ steps.app_version.outputs.value }}.apk
           path: apps/candy-native/android/app/build/outputs/apk/release/candy+${{ steps.app_version.outputs.value }}.apk
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/candy-native/android/app/build/outputs/apk/release/candy+${{ steps.app_version.outputs.value }}.apk
