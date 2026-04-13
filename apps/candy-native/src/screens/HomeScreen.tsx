@@ -32,6 +32,7 @@ export default function HomeScreen() {
 
   const [medModal, setMedModal] = useState<MedModal>(null);
   const [medToDelete, setMedToDelete] = useState<string | null>(null);
+  const deletingMedication = medications.find((m) => m.id === medToDelete) ?? null;
 
   const [name, setName] = useState("");
   const [times, setTimes] = useState<TimeToTake[]>([]);
@@ -169,7 +170,16 @@ export default function HomeScreen() {
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => setMedToDelete(med.id)}
-        style={styles.iconBtn}
+        style={[
+          styles.iconBtn,
+          styles.deleteIconBtn,
+          {
+            backgroundColor:
+              resolvedTheme === "dark"
+                ? "rgba(248,113,113,0.18)"
+                : "rgba(220,38,38,0.1)",
+          },
+        ]}
       >
         <MaterialIcons name="close" size={22} color={c.danger} />
       </TouchableOpacity>
@@ -343,27 +353,51 @@ export default function HomeScreen() {
 
       <Modal visible={!!medToDelete} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
-          <View style={[styles.confirmBox, { backgroundColor: c.surface }]}>
-            <MaterialIcons name="warning" size={48} color={c.danger} />
-            <Text style={[styles.modalTitle, { color: c.text, marginTop: 12 }]}>
+          <View style={[styles.confirmBox, { backgroundColor: c.surface, borderColor: c.border }]}>
+            <View
+              style={[
+                styles.confirmIconWrap,
+                {
+                  backgroundColor:
+                    resolvedTheme === "dark"
+                      ? "rgba(248,113,113,0.18)"
+                      : "rgba(220,38,38,0.1)",
+                },
+              ]}
+            >
+              <MaterialIcons name="warning-amber" size={42} color={c.danger} />
+            </View>
+            <Text style={[styles.modalTitle, { color: c.text, marginTop: 12, textAlign: "center" }]}>
               {String(t("Home.confirmDelete"))}
             </Text>
             <Text style={{ color: c.textMuted, textAlign: "center", marginVertical: 12 }}>
               {String(t("Home.deleteWarning"))}
             </Text>
+            {deletingMedication ? (
+              <View style={[styles.deletingNameBadge, { borderColor: c.border }]}>
+                <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700" }}>即将删除</Text>
+                <Text style={{ color: c.text, fontSize: 15, fontWeight: "800" }}>
+                  {String(deletingMedication.name)}
+                </Text>
+              </View>
+            ) : null}
             <View style={styles.confirmRow}>
-              <TouchableOpacity onPress={() => setMedToDelete(null)}>
-                <Text style={{ color: c.textMuted, fontWeight: "700" }}>
+              <TouchableOpacity
+                style={[styles.cancelDeleteBtn, { borderColor: c.border, backgroundColor: c.bg }]}
+                onPress={() => setMedToDelete(null)}
+              >
+                <Text style={{ color: c.textMuted, fontWeight: "800" }}>
                   {String(t("Home.cancel"))}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[styles.confirmDeleteBtn, { backgroundColor: c.danger }]}
                 onPress={() => {
                   if (medToDelete) removeMedication(medToDelete);
                   setMedToDelete(null);
                 }}
               >
-                <Text style={{ color: c.danger, fontWeight: "800" }}>
+                <Text style={{ color: "#fff", fontWeight: "900" }}>
                   {String(t("Home.confirm"))}
                 </Text>
               </TouchableOpacity>
@@ -417,6 +451,7 @@ const styles = StyleSheet.create({
   },
   dosageText: { fontSize: 12, fontWeight: "700" },
   iconBtn: { padding: 6 },
+  deleteIconBtn: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 6 },
   iconCircle: {
     width: 48,
     height: 48,
@@ -495,10 +530,42 @@ const styles = StyleSheet.create({
     padding: 24,
     borderRadius: 24,
     alignItems: "center",
+    borderWidth: 1.5,
+  },
+  confirmIconWrap: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deletingNameBadge: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    width: "100%",
+    gap: 2,
   },
   confirmRow: {
     flexDirection: "row",
-    gap: 32,
-    marginTop: 8,
+    gap: 10,
+    marginTop: 14,
+    width: "100%",
+  },
+  cancelDeleteBtn: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 11,
+  },
+  confirmDeleteBtn: {
+    flex: 1,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 11,
   },
 });

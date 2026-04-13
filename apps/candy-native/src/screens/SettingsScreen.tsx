@@ -129,82 +129,100 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: c.bg }]} contentContainerStyle={styles.content}>
-      <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.appearance"))}</Text>
-      <View style={styles.rowWrap}>
-        {(["auto", "light", "dark"] as Theme[]).map((k) => (
-          <TouchableOpacity
-            key={k}
-            style={[
-              styles.chip,
-              {
-                borderColor: c.border,
-                backgroundColor: theme === k ? c.accent : c.surface,
-              },
-            ]}
-            onPress={() => setTheme(k)}
-          >
-            <Text style={{ color: c.text, fontWeight: "800" }}>{String(t(`Settings.${k}`))}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.language"))}</Text>
-      <View style={styles.rowWrap}>
-        {(["cn", "en"] as const).map((l) => (
-          <TouchableOpacity
-            key={l}
-            style={[
-              styles.chip,
-              {
-                borderColor: c.border,
-                backgroundColor: language === l ? c.accent : c.surface,
-              },
-            ]}
-            onPress={() => setLanguage(l)}
-          >
-            <Text style={{ color: c.text, fontWeight: "800" }}>
-              {l === "cn" ? "简体中文" : "English"}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={[styles.sectionTitle, { color: c.text }]}>
-        {String(t("Settings.notificationsSection"))}
-      </Text>
-      <Text style={{ color: c.textMuted, marginBottom: 12 }}>{String(t("Settings.notificationsHint"))}</Text>
-      <TouchableOpacity
-        style={[styles.notifyBtn, { borderColor: c.accent, backgroundColor: c.surface }]}
-        onPress={() => void testNotify()}
-      >
-        <MaterialIcons name="notifications-active" size={22} color={c.text} />
-        <Text style={{ color: c.text, fontWeight: "800", marginLeft: 8 }}>
-          {String(t("Settings.testNotificationButton"))}
-        </Text>
-      </TouchableOpacity>
-
-      <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.presetTimes"))}</Text>
-      {(
-        [
-          ["breakfast", String(t("Settings.breakfast")), String(t("Settings.breakfastDesc"))] as const,
-          ["lunch", String(t("Settings.lunch")), String(t("Settings.lunchDesc"))] as const,
-          ["dinner", String(t("Settings.dinner")), String(t("Settings.dinnerDesc"))] as const,
-          ["bedtime", String(t("Settings.bedtime")), String(t("Settings.bedtimeDesc"))] as const,
-        ] as const
-      ).map(([key, title, desc]) => (
-        <View key={key} style={[styles.timeCard, { borderColor: c.border, backgroundColor: c.surface }]}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.timeTitle, { color: c.text }]}>{String(title)}</Text>
-            <Text style={{ color: c.textMuted, fontSize: 13 }}>{String(desc)}</Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.timeBtn, { borderColor: c.border }]}
-            onPress={() => openPicker(key)}
-          >
-            <Text style={{ color: c.text, fontWeight: "800" }}>{String(tempTimes[key] ?? "")}</Text>
-          </TouchableOpacity>
+      <View style={[styles.sectionCard, { borderColor: c.border, backgroundColor: c.surface }]}>
+        <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.appearance"))}</Text>
+        <View style={styles.rowWrap}>
+          {(["auto", "light", "dark"] as Theme[]).map((k) => {
+            const active = theme === k;
+            return (
+              <TouchableOpacity
+                key={k}
+                style={[
+                  styles.chip,
+                  {
+                    borderColor: active ? c.accentDark : c.border,
+                    backgroundColor: active ? c.accent : c.surface,
+                  },
+                ]}
+                onPress={() => setTheme(k)}
+              >
+                <Text style={{ color: active ? c.accentDark : c.text, fontWeight: "800" }}>
+                  {String(t(`Settings.${k}`))}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
-      ))}
+      </View>
+
+      <View style={[styles.sectionCard, { borderColor: c.border, backgroundColor: c.surface }]}>
+        <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.language"))}</Text>
+        <View style={styles.rowWrap}>
+          {(["cn", "en"] as const).map((l) => {
+            const active = language === l;
+            return (
+              <TouchableOpacity
+                key={l}
+                style={[
+                  styles.chip,
+                  {
+                    borderColor: active ? c.accentDark : c.border,
+                    backgroundColor: active ? c.accent : c.surface,
+                  },
+                ]}
+                onPress={() => setLanguage(l)}
+              >
+                <Text style={{ color: active ? c.accentDark : c.text, fontWeight: "800" }}>
+                  {l === "cn" ? "简体中文" : "English"}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      <View style={[styles.sectionCard, { borderColor: c.border, backgroundColor: c.surface }]}>
+        <Text style={[styles.sectionTitle, { color: c.text }]}>
+          {String(t("Settings.notificationsSection"))}
+        </Text>
+        <Text style={[styles.sectionHint, { color: c.textMuted }]}>
+          {String(t("Settings.notificationsHint"))}
+        </Text>
+        <TouchableOpacity
+          style={[styles.notifyBtn, { borderColor: c.accent, backgroundColor: c.surface }]}
+          onPress={() => void testNotify()}
+        >
+          <MaterialIcons name="notifications-active" size={22} color={c.text} />
+          <Text style={{ color: c.text, fontWeight: "800", marginLeft: 8 }}>
+            {String(t("Settings.testNotificationButton"))}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={[styles.sectionCard, { borderColor: c.border, backgroundColor: c.surface }]}>
+        <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.presetTimes"))}</Text>
+        {(
+          [
+            ["breakfast", String(t("Settings.breakfast")), String(t("Settings.breakfastDesc"))] as const,
+            ["lunch", String(t("Settings.lunch")), String(t("Settings.lunchDesc"))] as const,
+            ["dinner", String(t("Settings.dinner")), String(t("Settings.dinnerDesc"))] as const,
+            ["bedtime", String(t("Settings.bedtime")), String(t("Settings.bedtimeDesc"))] as const,
+          ] as const
+        ).map(([key, title, desc]) => (
+          <View key={key} style={[styles.timeCard, { borderColor: c.border, backgroundColor: c.bg }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.timeTitle, { color: c.text }]}>{String(title)}</Text>
+              <Text style={{ color: c.textMuted, fontSize: 13 }}>{String(desc)}</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.timeBtn, { borderColor: c.border, backgroundColor: c.surface }]}
+              onPress={() => openPicker(key)}
+            >
+              <Text style={{ color: c.text, fontWeight: "800" }}>{String(tempTimes[key] ?? "")}</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
 
       {picker && Platform.OS === "android" && (
         <DateTimePicker
@@ -262,20 +280,38 @@ export default function SettingsScreen() {
         ) : null}
       </View>
 
-      <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.disclaimerTitle"))}</Text>
-      <Text style={{ color: c.textMuted, marginBottom: 12 }}>{String(t("Settings.disclaimerBody"))}</Text>
-      <TouchableOpacity
-        onPress={() => void Linking.openURL("https://github.com/dongguacute/Candy")}
-        style={[styles.linkBtn, { borderColor: c.border }]}
-      >
-        <MaterialIcons name="open-in-new" size={20} color={c.text} />
-        <Text style={{ color: c.text, marginLeft: 8, fontWeight: "700" }}>
-          {String(t("Settings.sourceOnGitHub"))}
+      <View style={[styles.sectionCard, { borderColor: c.border, backgroundColor: c.surface }]}>
+        <Text style={[styles.sectionTitle, { color: c.text }]}>{String(t("Settings.disclaimerTitle"))}</Text>
+        <Text style={[styles.sectionHint, { color: c.textMuted }]}>
+          {String(t("Settings.disclaimerBody"))}
         </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => void Linking.openURL("https://github.com/dongguacute/Candy")}
+          style={[styles.linkBtn, { borderColor: c.border, backgroundColor: c.bg }]}
+        >
+          <MaterialIcons name="open-in-new" size={20} color={c.text} />
+          <Text style={{ color: c.text, marginLeft: 8, fontWeight: "700" }}>
+            {String(t("Settings.sourceOnGitHub"))}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      <View style={[styles.danger, { borderColor: c.danger }]}>
-        <Text style={[styles.sectionTitle, { color: c.danger }]}>{String(t("Settings.dangerZone"))}</Text>
+      <View
+        style={[
+          styles.danger,
+          {
+            borderColor: c.danger,
+            backgroundColor:
+              resolvedTheme === "dark" ? "rgba(248,113,113,0.12)" : "rgba(220,38,38,0.08)",
+          },
+        ]}
+      >
+        <View style={styles.dangerHeader}>
+          <MaterialIcons name="warning-amber" size={20} color={c.danger} />
+          <Text style={[styles.sectionTitle, { color: c.danger, marginTop: 0 }]}>
+            {String(t("Settings.dangerZone"))}
+          </Text>
+        </View>
         <Text style={{ color: c.textMuted, marginBottom: 12 }}>{String(t("Settings.dangerDesc"))}</Text>
         {!showDanger ? (
           <TouchableOpacity
@@ -292,18 +328,24 @@ export default function SettingsScreen() {
             <Text style={{ color: c.danger, fontWeight: "800", flex: 1 }}>
               {String(t("Settings.areYouSure"))}
             </Text>
-            <TouchableOpacity
-              onPress={() => {
-                void clearAllData();
-                setShowDanger(false);
-                Alert.alert(String(t("Settings.allCleared")));
-              }}
-            >
-              <Text style={{ color: c.danger, fontWeight: "900" }}>{String(t("Home.confirm"))}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowDanger(false)}>
-              <Text style={{ color: c.textMuted, fontWeight: "800" }}>{String(t("Home.cancel"))}</Text>
-            </TouchableOpacity>
+            <View style={styles.dangerActions}>
+              <TouchableOpacity
+                style={[styles.dangerGhostBtn, { borderColor: c.border, backgroundColor: c.surface }]}
+                onPress={() => setShowDanger(false)}
+              >
+                <Text style={{ color: c.textMuted, fontWeight: "800" }}>{String(t("Home.cancel"))}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.dangerSolidBtn, { backgroundColor: c.danger }]}
+                onPress={() => {
+                  void clearAllData();
+                  setShowDanger(false);
+                  Alert.alert(String(t("Settings.allCleared")));
+                }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "900" }}>{String(t("Home.confirm"))}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </View>
@@ -313,21 +355,30 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 48 },
-  sectionTitle: { fontSize: 18, fontWeight: "900", marginTop: 20, marginBottom: 12 },
+  content: { padding: 16, paddingBottom: 48, gap: 14 },
+  sectionCard: {
+    borderWidth: 1.5,
+    borderRadius: 20,
+    padding: 14,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: "900", marginBottom: 10 },
+  sectionHint: { marginBottom: 12, lineHeight: 20 },
   rowWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
     borderWidth: 2,
     borderRadius: 999,
     paddingHorizontal: 16,
     paddingVertical: 10,
+    minWidth: 96,
+    alignItems: "center",
   },
   notifyBtn: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 2,
     borderRadius: 999,
-    padding: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     alignSelf: "flex-start",
   },
   timeCard: {
@@ -349,9 +400,8 @@ const styles = StyleSheet.create({
   saveRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
-    marginTop: 16,
-    marginBottom: 8,
+    gap: 12,
+    marginVertical: 2,
   },
   saveBtn: {
     flexDirection: "row",
@@ -372,8 +422,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 20,
     padding: 16,
-    marginTop: 24,
   },
+  dangerHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
   dangerBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -382,7 +432,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignSelf: "flex-start",
   },
-  dangerRow: { flexDirection: "row", flexWrap: "wrap", gap: 16, alignItems: "center" },
+  dangerRow: { gap: 12 },
+  dangerActions: { flexDirection: "row", alignItems: "center", gap: 10 },
+  dangerGhostBtn: {
+    borderWidth: 1.5,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  dangerSolidBtn: {
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
   pickerBackdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.35)",
